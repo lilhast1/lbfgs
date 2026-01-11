@@ -1,0 +1,19 @@
+BasedOnStyle: Google
+IndentWidth: 4
+ColumnLimit: 100
+DerivePointerAlignment: false
+PointerAlignment: Left
+AllowShortFunctionsOnASingleLine: Inline
+ReflowComments: true
+SortIncludes: true
+SpaceAfterTemplateKeyword: true
+IndentPPDirectives: AfterHash
+AlwaysBreakAfterReturnType: None
+
+
+
+BreakBeforeTernaryOperators: true
+BreakBeforeBinaryOperators: NonAssignment
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowShortBlocksOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: false

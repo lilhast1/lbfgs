@@ -1,37 +1,49 @@
-cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.16)
 project(LBFGS_CUDA LANGUAGES CXX CUDA)
 
-# Set C++ standard
+# Use C++17
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Set output directories
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+# -----------------------------
+# Find CUDA (old-style)
+# -----------------------------
+find_package(CUDA REQUIRED)
 
-# Include directories
-include_directories(${PROJECT_SOURCE_DIR}/include)
-include_directories(${PROJECT_SOURCE_DIR}/src)
+# -----------------------------
+# Set GPU architectures
+# -----------------------------
+# Adjust based on your GPU:
+# T550 -> 5.2, GTX1060 -> 6.1
+set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -gencode arch=compute_52,code=sm_52 -gencode arch=compute_61,code=sm_61")
 
-# Sources
-set(SOURCES
+# Use shared runtime to avoid missing static libraries
+set(CUDA_PROPAGATE_HOST_FLAGS OFF)
+set(CUDA_USE_STATIC_CUDA_RUNTIME OFF)
+
+# -----------------------------
+# Source files
+# -----------------------------
+set(SRC
     src/main.cpp
-    src/lbfgs.cpp
     cuda/lbfgs_kernel.cu
 )
 
-# Create executable
-add_executable(lbfgs_cuda ${SOURCES})
+# -----------------------------
+# Add executable
+# -----------------------------
+cuda_add_executable(lbfgs_cuda ${SRC})
 
-# Enable CUDA separable compilation (needed for device code linking)
-set_target_properties(lbfgs_cuda PROPERTIES
-    CUDA_SEPARABLE_COMPILATION ON
+# -----------------------------
+# Include directories
+# -----------------------------
+include_directories(${CUDA_INCLUDE_DIRS})
+include_directories(cuda)  # Optional: for your lbfgs_kernel.cu headers
+
+# -----------------------------
+# Link libraries
+# -----------------------------
+target_link_libraries(lbfgs_cuda
+    ${CUDA_CUBLAS_LIBRARIES}  # cuBLAS
+    ${CUDA_CUDA_LIBRARY}       # CUDA runtime
 )
-
-# Optional: specify GPU architecture (adjust to your GPU)
-set_target_properties(lbfgs_cuda PROPERTIES
-    CUDA_ARCHITECTURES "61"
-)
-
-# Link libraries if needed (e.g., cuBLAS)
-find_package(CUDA REQUIRED)
-target_link_libraries(lbfgs_cuda PRIVATE ${CUDA_LIBRARIES})
