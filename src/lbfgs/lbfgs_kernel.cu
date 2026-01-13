@@ -4,6 +4,11 @@
 #include <cmath>
 #include <cstddef>
 
+#include "../utils/functions.h"
+#include "lbfgs_kernel.h"
+
+namespace lbfgs {
+namespace basic {
 __global__ void update_x_kernel(int n, double* x, const double* d, double alpha) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i < n)
@@ -25,7 +30,7 @@ __global__ void scale_vector_kernel(int n, double* r, const double* q, double H0
         r[i] = H0 * q[i];
 }
 
-template <typename Func>
+// bez linesearch
 class lbfgs {
     double* d_x;
     double* d_x_old;
@@ -45,10 +50,10 @@ class lbfgs {
     void init(std::size_t problem_size, std::size_t memory_size) {
         cublasCreate(&handle);
 
-        cudaMalloc(&d_x, problem_size * sizeof(double));
-        cudaMalloc(&d_x_old, problem_size * sizeof(double));
-        cudaMalloc(&d_g, problem_size * sizeof(double));
-        cudaMalloc(&d_g_old, problem_size * sizeof(double));
+        cudaMallocManaged(&d_x, problem_size * sizeof(double));
+        cudaMallocManaged(&d_x_old, problem_size * sizeof(double));
+        cudaMallocManaged(&d_g, problem_size * sizeof(double));
+        cudaMallocManaged(&d_g_old, problem_size * sizeof(double));
         cudaMalloc(&d_d, problem_size * sizeof(double));
         cudaMalloc(&d_q, problem_size * sizeof(double));
         cudaMalloc(&d_r, problem_size * sizeof(double));
@@ -76,11 +81,11 @@ class lbfgs {
 
    public:
     void operator()(const std::size_t problem_size, const std::size_t memory_size, double* x0,
-                    const std::size_t max_itr, Func func, const double eps = 1e-9) {
+                    const std::size_t max_itr, Func& func, const double eps = 1e-9) {
         init(problem_size, memory_size);
 
         cudaMemcpy(d_x, x0, problem_size * sizeof(double), cudaMemcpyHostToDevice);
-        double val = func.f(d_x, problem_size);
+        double val = func(d_x, problem_size);
         func.df(d_x, d_g, problem_size);
 
         double neg_one = -1.0;
@@ -92,7 +97,7 @@ class lbfgs {
 
         update_x_kernel<<<(problem_size + 255) / 256, 256>>>(problem_size, d_x, d_d, alpha);
 
-        val = func.f(d_x, problem_size);
+        val = func(d_x, problem_size);
         func.df(d_x, d_g, problem_size);
         compute_sy_kernel<<<(problem_size + 255) / 256, 256>>>(problem_size, d_S, d_Y, d_x, d_x_old,
                                                                d_g, d_g_old);
@@ -147,7 +152,7 @@ class lbfgs {
 
             update_x_kernel<<<(problem_size + 255) / 256, 256>>>(problem_size, d_x, d_d, alpha);
 
-            val = func.f(d_x, problem_size);
+            val = func(d_x, problem_size);
             func.df(d_x, d_g, problem_size);
 
             int history_pos = (itr % memory_size);
@@ -159,3 +164,5 @@ class lbfgs {
         destroy();
     }
 };
+}  // namespace basic
+}  // namespace lbfgs

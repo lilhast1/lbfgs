@@ -1,33 +1,12 @@
-#include <cuda_runtime.h>
+// #include <cuda_runtime.h>
 
 #include <cstddef>
 #include <iostream>
 
-#include "../cuda/lbfgs_kernel.cu"
-
+#include "lbfgs/lbfgs_kernel.h"
+#include "utils/functions.h"
 // include your full.cu header OR forward-declare LBFGS
 // #include "lbfgs.cuh"
-
-struct Quadratic {
-    // f(x) = 0.5 * ||x||^2
-    double f(double* d_x, std::size_t n) {
-        double result = 0.0;
-
-        // compute on host for simplicity
-        double* h_x = new double[n];
-        cudaMemcpy(h_x, d_x, n * sizeof(double), cudaMemcpyDeviceToHost);
-
-        for (std::size_t i = 0; i < n; ++i) result += 0.5 * h_x[i] * h_x[i];
-
-        delete[] h_x;
-        return result;
-    }
-
-    // df/dx = x
-    void df(double* d_x, double* d_g, std::size_t n) {
-        cudaMemcpy(d_g, d_x, n * sizeof(double), cudaMemcpyDeviceToDevice);
-    }
-};
 
 int main() {
     constexpr std::size_t N = 16;
@@ -37,8 +16,8 @@ int main() {
     double x0[N];
     for (std::size_t i = 0; i < N; ++i) x0[i] = 10.0;  // start far from minimum
 
-    Quadratic func;
-    lbfgs<Quadratic> optimizer;
+    Quadratic2D func;
+    lbfgs::basic::lbfgs optimizer;
 
     optimizer(N, M, x0, MAX_ITR, func, 1e-8);
 
