@@ -1,49 +1,68 @@
 cmake_minimum_required(VERSION 3.16)
 project(LBFGS_CUDA LANGUAGES CXX CUDA)
 
-# Use C++17
+# Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# -----------------------------
-# Find CUDA (old-style)
-# -----------------------------
-find_package(CUDA REQUIRED)
+# Set CUDA standard
+set(CMAKE_CUDA_STANDARD 17)
+set(CMAKE_CUDA_STANDARD_REQUIRED ON)
 
-# -----------------------------
-# Set GPU architectures
-# -----------------------------
-# Adjust based on your GPU:
-# T550 -> 5.2, GTX1060 -> 6.1
-set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -gencode arch=compute_52,code=sm_52 -gencode arch=compute_61,code=sm_61")
+# Find CUDA
 
-# Use shared runtime to avoid missing static libraries
-set(CUDA_PROPAGATE_HOST_FLAGS OFF)
-set(CUDA_USE_STATIC_CUDA_RUNTIME OFF)
 
-# -----------------------------
-# Source files
-# -----------------------------
-set(SRC
-    src/main.cpp
-    cuda/lbfgs_kernel.cu
+# CUDA architecture (adjust based on your GPU)
+# Common values: 61 (GTX 1080), 75 (RTX 2080), 80 (A100), 86 (RTX 3090), 89 (RTX 4090)
+set(CMAKE_CUDA_ARCHITECTURES 61)
+
+# Include directories
+include_directories(
+    ${CMAKE_SOURCE_DIR}/src
+    ${CMAKE_SOURCE_DIR}/src/lbfgs
+    ${CMAKE_SOURCE_DIR}/src/utils
 )
 
-# -----------------------------
-# Add executable
-# -----------------------------
-cuda_add_executable(lbfgs_cuda ${SRC})
+# Source files
+set(CUDA_SOURCES
+    src/lbfgs/lbfgs.cu
+    src/lbfgs/lbfgs_kernel.cu
+    src/lbfgs/lbfgs_lnsrch.cu
+)
 
-# -----------------------------
-# Include directories
-# -----------------------------
-include_directories(${CUDA_INCLUDE_DIRS})
-include_directories(cuda)  # Optional: for your lbfgs_kernel.cu headers
+set(CPP_SOURCES
+    src/main.cpp
+    src/utils/functions.cpp
+)
 
-# -----------------------------
-# Link libraries
-# -----------------------------
-target_link_libraries(lbfgs_cuda
-    ${CUDA_CUBLAS_LIBRARIES}  # cuBLAS
-    ${CUDA_CUDA_LIBRARY}       # CUDA runtime
+# Create executable
+add_executable(lbfgs_cuda ${CUDA_SOURCES} ${CPP_SOURCES})
+
+# Link CUDA libraries
+target_link_libraries(lbfgs_cuda 
+    CUDA::cudart
+    CUDA::cublas
+)
+
+# Compiler flags
+target_compile_options(lbfgs_cuda PRIVATE
+    $<$<COMPILE_LANGUAGE:CUDA>:
+        --use_fast_math
+        --expt-relaxed-constexpr
+        -Xcompiler=-Wall
+    >
+    $<$<COMPILE_LANGUAGE:CXX>:
+        -Wall
+        -Wextra
+    >
+)
+
+# Set output directory
+set_target_properties(lbfgs_cuda PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+)
+
+# Optional: Enable separable compilation for CUDA
+set_target_properties(lbfgs_cuda PROPERTIES
+    CUDA_SEPARABLE_COMPILATION ON
 )
