@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <chrono>
 #include <cmath>
 #include <cstring>
 #include <iostream>
@@ -56,6 +57,21 @@ struct DotLookupTable {
     void clean() {
         cudaMemset(d_partial, 0, max_grid_size * sizeof(double));
         memset(h_partial, 0, max_grid_size * sizeof(double));
+    }
+};
+
+struct KernelConfig {
+    int blockSize;
+    int gridSize;
+
+    KernelConfig(int n) {
+        blockSize = 256;
+        int numSMs;
+        cudaDeviceGetAttribute(&numSMs, cudaDevAttrMultiProcessorCount, 0);
+        gridSize = 32 * numSMs;
+        int maxBlocks = (n + blockSize - 1) / blockSize;
+        if (gridSize > maxBlocks)
+            gridSize = maxBlocks;
     }
 };
 
@@ -161,24 +177,36 @@ int main(int argc, char* argv[]) {
 
     // --- TEST 1: QUADRATIC ---
     for (int i = 0; i < N; i++) x0[i] = 5.0;  // Start far away
+    auto start = std::chrono::high_resolution_clock::now();
     QuadraticTest quad(N);
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> duration = end - start;
     printf("Starting Quadratic...\n");
     double final_f = lbfgs(N, M, x0, 1000, quad, 1e-6);
     printf("Quadratic Final F: %e (Target: 0)\n", final_f);
+    std::cout << "Time elapsed: " << duration.count() << " ms\n";
 
     // --- TEST 2: ROSENBROCK ---
     for (int i = 0; i < N; i++) x0[i] = -1.2;  // Standard starting point
+    start = std::chrono::high_resolution_clock::now();
     RosenbrockTest rosen(N);
+    end = std::chrono::high_resolution_clock::now();
     printf("Starting Rosenbrock...\n");
     final_f = lbfgs(N, M, x0, 5000, rosen, 1e-6);
+    duration = end - start;
     printf("Rosenbrock Final F: %e (Target: 0)\n", final_f);
+    std::cout << "Time elapsed: " << duration.count() << " ms\n";
 
     // --- TEST 2: Rastrigin ---
     for (int i = 0; i < N; i++) x0[i] = -1.2;  // Standard starting point
+    start = std::chrono::high_resolution_clock::now();
     RastriginTest rastrigin(N);
+    end = std::chrono::high_resolution_clock::now();
+    duration = end - start;
     printf("Starting Rastrigin...\n");
     final_f = lbfgs(N, M, x0, 5000, rastrigin, 1e-6);
     printf("Rastrigin Final F: %e (Target: 0)\n", final_f);
+    std::cout << "Time elapsed: " << duration.count() << " ms\n";
 
     delete[] x0;
 
@@ -197,16 +225,18 @@ __global__ void mulVecScal(double alpha, const double* x, double* y, int n) {
         y[i] += alpha * x[i];
 }
 
+// y = y + alpha * x
 __global__ void axpy(double alpha, const double* x, double* y, int n) {
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
-    if (i < n)
+    for (int i = blockIdx.x * blockDim.x + threadIdx.x; i < n; i += blockDim.x * gridDim.x) {
         y[i] += alpha * x[i];
+    }
 }
 
+// r = factor * q
 __global__ void setVectorScalar(double* r, const double* q, double factor, int n) {
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
-    if (i < n)
+    for (int i = blockIdx.x * blockDim.x + threadIdx.x; i < n; i += blockDim.x * gridDim.x) {
         r[i] = q[i] * factor;
+    }
 }
 
 __global__ void dotProduct(const double* a, const double* b, double* c, int n) {
@@ -330,6 +360,7 @@ double lbfgs(int n, int m, double* x0, int max_itr, Func func, const double eps)
     double* rho = new double[m];
     double* alpha_hist = new double[m];
     DotLookupTable dw(n);
+    KernelConfig cfg(n);
 
     cudaMemcpy(x.elems, x0, n * sizeof(double), cudaMemcpyHostToDevice);
 
@@ -343,8 +374,7 @@ double lbfgs(int n, int m, double* x0, int max_itr, Func func, const double eps)
 
         // 1. Compute Search Direction d
         if (k == 0) {
-            setVectorScalar<<<(n + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE>>>(d.elems, g.elems,
-                                                                               -1.0, n);
+            setVectorScalar<<<cfg.gridSize, cfg.blockSize>>>(d.elems, g.elems, -1.0, n);
         } else {
             // --- TWO-LOOP RECURSION ---
             cudaMemcpy(q.elems, g.elems, n * sizeof(double), cudaMemcpyDeviceToDevice);
@@ -352,8 +382,8 @@ double lbfgs(int n, int m, double* x0, int max_itr, Func func, const double eps)
             for (int i = bound - 1; i >= 0; --i) {
                 int idx = (k - 1 - i) % m;
                 alpha_hist[idx] = rho[idx] * dot(S.elems + idx * n, q.elems, n, &dw);
-                axpy<<<(n + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE>>>(
-                    -alpha_hist[idx], Y.elems + idx * n, q.elems, n);
+                axpy<<<cfg.gridSize, cfg.blockSize>>>(-alpha_hist[idx], Y.elems + idx * n, q.elems,
+                                                      n);
             }
 
             int last_idx = (k - 1) % m;
@@ -361,17 +391,15 @@ double lbfgs(int n, int m, double* x0, int max_itr, Func func, const double eps)
             double y_dot_y = dot(Y.elems + last_idx * n, Y.elems + last_idx * n, n, &dw);
             double gamma = (y_dot_y > 1e-18) ? (s_dot_y / y_dot_y) : 1.0;
 
-            setVectorScalar<<<(n + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE>>>(r.elems, q.elems,
-                                                                               gamma, n);
+            setVectorScalar<<<cfg.gridSize, cfg.blockSize>>>(r.elems, q.elems, gamma, n);
 
             for (int i = 0; i < bound; ++i) {
                 int idx = (k - bound + i) % m;
                 double beta = rho[idx] * dot(Y.elems + idx * n, r.elems, n, &dw);
-                axpy<<<(n + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE>>>(
-                    alpha_hist[idx] - beta, S.elems + idx * n, r.elems, n);
+                axpy<<<cfg.gridSize, cfg.blockSize>>>(alpha_hist[idx] - beta, S.elems + idx * n,
+                                                      r.elems, n);
             }
-            setVectorScalar<<<(n + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE>>>(d.elems, r.elems,
-                                                                               -1.0, n);
+            setVectorScalar<<<cfg.gridSize, cfg.blockSize>>>(d.elems, r.elems, -1.0, n);
         }
 
         // 2. BACKTRACKING LINE SEARCH
@@ -379,8 +407,7 @@ double lbfgs(int n, int m, double* x0, int max_itr, Func func, const double eps)
 
         // Safety: If d is not a descent direction, reset to steepest descent
         if (g_dot_d >= 0) {
-            setVectorScalar<<<(n + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE>>>(d.elems, g.elems,
-                                                                               -1.0, n);
+            setVectorScalar<<<cfg.gridSize, cfg.blockSize>>>(d.elems, g.elems, -1.0, n);
             g_dot_d = dot(g.elems, d.elems, n, &dw);
         }
 
@@ -396,7 +423,7 @@ double lbfgs(int n, int m, double* x0, int max_itr, Func func, const double eps)
         for (int ls_iter = 0; ls_iter < 25; ls_iter++) {
             // Trial x = x_old + step * d
             cudaMemcpy(x.elems, x_old.elems, n * sizeof(double), cudaMemcpyDeviceToDevice);
-            axpy<<<(n + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE>>>(step, d.elems, x.elems, n);
+            axpy<<<cfg.gridSize, cfg.blockSize>>>(step, d.elems, x.elems, n);
 
             // Copy to host for CPU evaluation
             cudaMemcpy(host_x_trial, x.elems, n * sizeof(double), cudaMemcpyDeviceToHost);
@@ -425,13 +452,11 @@ double lbfgs(int n, int m, double* x0, int max_itr, Func func, const double eps)
         int cur = k % m;
         // S_cur = x - x_old
         cudaMemcpy(S.elems + cur * n, x.elems, n * sizeof(double), cudaMemcpyDeviceToDevice);
-        axpy<<<(n + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE>>>(-1.0, x_old.elems,
-                                                                S.elems + cur * n, n);
+        axpy<<<cfg.gridSize, cfg.blockSize>>>(-1.0, x_old.elems, S.elems + cur * n, n);
 
         // Y_cur = g - g_old
         cudaMemcpy(Y.elems + cur * n, g.elems, n * sizeof(double), cudaMemcpyDeviceToDevice);
-        axpy<<<(n + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE>>>(-1.0, g_old.elems,
-                                                                Y.elems + cur * n, n);
+        axpy<<<cfg.gridSize, cfg.blockSize>>>(-1.0, g_old.elems, Y.elems + cur * n, n);
 
         double sy = dot(S.elems + cur * n, Y.elems + cur * n, n, &dw);
         if (sy > 1e-12) {
