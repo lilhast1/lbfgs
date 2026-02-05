@@ -13,6 +13,8 @@
 #define M_E 2.71828182845904523536
 #endif
 
+#define BLOCK_SIZE 256
+
 __global__ void update_x_kernel(int n, float* x, const float* d, float alpha) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i < n)
@@ -32,6 +34,28 @@ __global__ void scale_vector_kernel(int n, float* r, const float* q, float H0) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i < n)
         r[i] = H0 * q[i];
+}
+
+__global__ void fill_ones(float* a, int n) {
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i < n) a[i] = 1.0f;
+}
+
+// true sum: sum_i v[i]
+static float* d_ones = nullptr;
+static int ones_cap = 0;
+
+static float gpu_sum_f32_cublas(cublasHandle_t h, const float* d_v, int n) {
+    if (n > ones_cap) {
+        if (d_ones) cudaFree(d_ones);
+        cudaMalloc(&d_ones, n * sizeof(float));
+        int blocks = (n + 255) / 256;
+        fill_ones<<<blocks, 256>>>(d_ones, n);
+        ones_cap = n;
+    }
+    float s = 0.0f;
+    cublasSdot(h, n, d_v, 1, d_ones, 1, &s);
+    return s;
 }
 
 template <typename Func>
@@ -83,90 +107,134 @@ class lbfgs {
         cublasDestroy(handle);
     }
 
-   public:
-    void operator()(const std::size_t problem_size, const std::size_t memory_size, float* x0,
-                    const std::size_t max_itr, Func func, const float eps = 1e-9) {
+public:
+   double operator()(const std::size_t problem_size, const std::size_t memory_size, float* x0,
+        const std::size_t max_itr, Func func, const float eps = 1e-9f) {
+
         init(problem_size, memory_size);
 
-        cudaMemcpy(d_x, x0, problem_size * sizeof(float), cudaMemcpyHostToDevice);
-        float val = func.f(d_x, problem_size);
-        func.df(d_x, d_g, problem_size);
+        func.set_handle(&handle);
 
+        const int n = (int)problem_size;
+        const int m = (int)memory_size;
+
+        cudaMemcpy(d_x, x0, n * sizeof(float), cudaMemcpyHostToDevice);
+
+        float val = (float)func.f(d_x, n);
+        func.df(d_x, d_g, n);
+
+        // d = -g
         float neg_one = -1.0f;
-        cublasScopy(handle, problem_size, d_g, 1, d_d, 1);
-        cublasSscal(handle, problem_size, &neg_one, d_d, 1);
+        cublasScopy(handle, n, d_g, 1, d_d, 1);
+        cublasSscal(handle, n, &neg_one, d_d, 1);
+
+        // initial step (alpha fixed as before)
         float alpha = 1.0f;
-        cudaMemcpy(d_x_old, d_x, problem_size * sizeof(float), cudaMemcpyDeviceToDevice);
-        cudaMemcpy(d_g_old, d_g, problem_size * sizeof(float), cudaMemcpyDeviceToDevice);
+        cudaMemcpy(d_x_old, d_x, n * sizeof(float), cudaMemcpyDeviceToDevice);
+        cudaMemcpy(d_g_old, d_g, n * sizeof(float), cudaMemcpyDeviceToDevice);
 
-        update_x_kernel<<<(problem_size + 255) / 256, 256>>>(problem_size, d_x, d_d, alpha);
+        update_x_kernel<<<(n + 255) / 256, 256>>>(n, d_x, d_d, alpha);
 
-        val = func.f(d_x, problem_size);
-        func.df(d_x, d_g, problem_size);
-        compute_sy_kernel<<<(problem_size + 255) / 256, 256>>>(problem_size, d_S, d_Y, d_x, d_x_old,
-                                                               d_g, d_g_old);
+        val = (float)func.f(d_x, n);
+        func.df(d_x, d_g, n);
 
-        for (int itr = 0; itr < max_itr; itr++) {
-            float g_norm;
-            cublasSnrm2(handle, problem_size, d_g, 1, &g_norm);
+        // store first (s,y) into slot 0
+        compute_sy_kernel<<<(n + 255) / 256, 256>>>(n, d_S + 0 * n, d_Y + 0 * n, d_x, d_x_old, d_g, d_g_old);
 
-            if (g_norm / (std::fabs(val) + 1.0f) <= eps) {
-                break;
-            }
+        // MAIN LOOP: start at itr=1 (because we already filled history slot 0)
+        for (int itr = 1; itr < (int)max_itr; ++itr) {
+            float g_norm = 0.0f;
+            cublasSnrm2(handle, n, d_g, 1, &g_norm);
 
-            int bound = itr > memory_size ? memory_size : itr;
-            int curr = (itr - 1) % memory_size;
-            cudaMemcpy(d_q, d_g, problem_size * sizeof(float), cudaMemcpyDeviceToDevice);
+            if (g_norm / (std::fabs(val) + 1.0f) <= eps) break;
 
+            int bound = (itr < m) ? itr : m;
+            int curr  = (itr - 1) % m;   // now never negative
+
+            // q = g
+            cudaMemcpy(d_q, d_g, n * sizeof(float), cudaMemcpyDeviceToDevice);
+
+            // Backward loop
             for (int i = bound - 1; i >= 0; --i) {
-                int idx = (itr - 1 - i) % memory_size;
-                float dot_sq, dot_sy;
-                cublasSdot(handle, problem_size, d_S + idx * problem_size, 1, d_q, 1, &dot_sq);
-                cublasSdot(handle, problem_size, d_S + idx * problem_size, 1,
-                           d_Y + idx * problem_size, 1, &dot_sy);
-                rho[idx] = 1.0f / dot_sy;
-                a[idx] = rho[idx] * dot_sq;
-                float neg_a = -a[idx];
-                cublasSaxpy(handle, problem_size, &neg_a, d_Y + idx * problem_size, 1, d_q, 1);
+                int idx = (itr - 1 - i) % m;
+
+                float* s = d_S + idx * n;
+                float* y = d_Y + idx * n;
+
+                float sTq = 0.0f, yTs = 0.0f;
+                cublasSdot(handle, n, s, 1, d_q, 1, &sTq);
+                cublasSdot(handle, n, y, 1, s, 1, &yTs);   // y^T s (more standard + stable)
+
+                // Guard against bad curvature / div0 (important in float)
+                if (!std::isfinite(yTs) || std::fabs(yTs) < 1e-20f) {
+                    rho[idx] = 0.0f;
+                    a[idx]   = 0.0f;
+                    continue;
+                }
+
+                rho[idx] = 1.0f / yTs;
+                a[idx]   = rho[idx] * sTq;
+
+                float neg_ai = -a[idx];
+                cublasSaxpy(handle, n, &neg_ai, y, 1, d_q, 1);  // q -= a_i * y_i
             }
 
-            float ys, yy;
-            cublasSdot(handle, problem_size, d_Y + curr * problem_size, 1,
-                       d_S + curr * problem_size, 1, &ys);
-            cublasSdot(handle, problem_size, d_Y + curr * problem_size, 1,
-                       d_Y + curr * problem_size, 1, &yy);
-            scale_vector_kernel<<<(problem_size + 255) / 256, 256>>>(problem_size, d_r, d_q,
-                                                                     ys / yy);
+            // H0 scaling: (s^T y) / (y^T y)
+            float* ycur = d_Y + curr * n;
+            float* scur = d_S + curr * n;
 
-            // Forward Loop
+            float ys = 0.0f, yy = 0.0f;
+            cublasSdot(handle, n, scur, 1, ycur, 1, &ys);
+            cublasSdot(handle, n, ycur, 1, ycur, 1, &yy);
+
+            float H0 = 1.0f;
+            if (std::isfinite(ys) && std::isfinite(yy) && std::fabs(yy) > 1e-20f) {
+                H0 = ys / yy;
+            }
+
+            scale_vector_kernel<<<(n + 255) / 256, 256>>>(n, d_r, d_q, H0);
+
+            // Forward loop
             for (int i = 0; i < bound; ++i) {
-                int idx = (itr - bound + i) % memory_size;
-                float b;
-                cublasSdot(handle, problem_size, d_Y + idx * problem_size, 1, d_r, 1, &b);
-                float factor = a[idx] - (rho[idx] * b);
-                cublasSaxpy(handle, problem_size, &factor, d_S + idx * problem_size, 1, d_r, 1);
+                int idx = (itr - bound + i) % m;
+
+                float* s = d_S + idx * n;
+                float* y = d_Y + idx * n;
+
+                float yTr = 0.0f;
+                cublasSdot(handle, n, y, 1, d_r, 1, &yTr);
+
+                float beta = rho[idx] * yTr;
+                float coeff = a[idx] - beta;
+
+                cublasSaxpy(handle, n, &coeff, s, 1, d_r, 1);  // r += (a-beta) s
             }
-            float neg_one = -1.0f;
-            cublasScopy(handle, problem_size, d_r, 1, d_d, 1);
-            cublasSscal(handle, problem_size, &neg_one, d_d, 1);
 
-            float alpha = 1.0;
-            cudaMemcpy(d_x_old, d_x, problem_size * sizeof(float), cudaMemcpyDeviceToDevice);
-            cudaMemcpy(d_g_old, d_g, problem_size * sizeof(float), cudaMemcpyDeviceToDevice);
+            // d = -r
+            cublasScopy(handle, n, d_r, 1, d_d, 1);
+            cublasSscal(handle, n, &neg_one, d_d, 1);
 
-            update_x_kernel<<<(problem_size + 255) / 256, 256>>>(problem_size, d_x, d_d, alpha);
+            // Step (still fixed alpha=1.0 as you had)
+            alpha = 1.0f;
+            cudaMemcpy(d_x_old, d_x, n * sizeof(float), cudaMemcpyDeviceToDevice);
+            cudaMemcpy(d_g_old, d_g, n * sizeof(float), cudaMemcpyDeviceToDevice);
 
-            val = func.f(d_x, problem_size);
-            func.df(d_x, d_g, problem_size);
+            update_x_kernel<<<(n + 255) / 256, 256>>>(n, d_x, d_d, alpha);
 
-            int history_pos = (itr % memory_size);
-            compute_sy_kernel<<<(problem_size + 255) / 256, 256>>>(
-                problem_size, d_S + history_pos * problem_size, d_Y + history_pos * problem_size,
+            val = (float)func.f(d_x, n);
+            func.df(d_x, d_g, n);
+
+            int history_pos = itr % m;
+            compute_sy_kernel<<<(n + 255) / 256, 256>>>(n,
+                d_S + history_pos * n, d_Y + history_pos * n,
                 d_x, d_x_old, d_g, d_g_old);
         }
-        cudaMemcpy(x0, d_x, problem_size * sizeof(float), cudaMemcpyDeviceToHost);
+
+        cudaMemcpy(x0, d_x, n * sizeof(float), cudaMemcpyDeviceToHost);
         destroy();
+        return (double)val;
     }
+
 };
 
 template <typename T>
@@ -184,6 +252,9 @@ template <typename T>
 struct QuadraticTest {
     T* d_temp_f;
 
+    cublasHandle_t* h = nullptr;
+    void set_handle(cublasHandle_t* ph) { h = ph; }
+
     QuadraticTest(int n) : d_temp_f(nullptr) {
         cudaMalloc(&d_temp_f, n * sizeof(T));
     }
@@ -194,7 +265,8 @@ struct QuadraticTest {
     double f(T* d_x, int n) {
         int blocks = (n + BLOCK_SIZE - 1) / BLOCK_SIZE;
         quad_kernel<T><<<blocks, BLOCK_SIZE>>>(d_x, d_temp_f, (T*)nullptr, n);
-        return gpu_sum(d_temp_f, n);
+        float result = gpu_sum_f32_cublas(*h, (float*)d_temp_f, n);
+        return (double)result;
     }
 
     void df(T* d_x, T* d_g, int n) {
@@ -224,7 +296,28 @@ __global__ void rosen_kernel(const T* x, T* f_vals, T* g, int n) {
     }
 }
 
-// No-atom version (for testing)
+// Wrapper za Rosenbrock test
+template <typename T>
+struct RosenbrockTest {
+    T* d_temp_f;
+    cublasHandle_t* h = nullptr;
+    void set_handle(cublasHandle_t* ph) { h = ph; }
+
+    RosenbrockTest(int n) { cudaMalloc(&d_temp_f, n * sizeof(T)); }
+    ~RosenbrockTest() { cudaFree(d_temp_f); }
+
+    double f(T* d_x, int n) {
+        cudaMemset(d_temp_f, 0, n * sizeof(T));
+        rosen_kernel<<<(n + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE>>>(d_x, d_temp_f, (T*)nullptr, n);
+        float result = gpu_sum_f32_cublas(*h, (float*)d_temp_f, n);
+        return (double)result;
+    }
+    void df(T* d_x, T* d_g, int n) {
+        cudaMemset(d_g, 0, n * sizeof(T));
+        rosen_kernel<<<(n + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE>>>(d_x, (T*)nullptr, d_g, n);
+    }
+};
+
 template <typename T>
 __global__ void rosen_fg_kernel_noatom(const T* x, T* f_vals, T* g, int n) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -264,28 +357,12 @@ __global__ void rosen_fg_kernel_noatom(const T* x, T* f_vals, T* g, int n) {
     }
 }
 
-// Wrapper za Rosenbrock test
-template <typename T>
-struct RosenbrockTest {
-    T* d_temp_f;
-    RosenbrockTest(int n) { cudaMalloc(&d_temp_f, n * sizeof(T)); }
-    ~RosenbrockTest() { cudaFree(d_temp_f); }
-
-    double f(T* d_x, int n) {
-        cudaMemset(d_temp_f, 0, n * sizeof(T));
-        rosen_kernel<<<(n + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE>>>(d_x, d_temp_f, (T*)nullptr, n);
-        return gpu_sum(d_temp_f, n);
-    }
-    void df(T* d_x, T* d_g, int n) {
-        cudaMemset(d_g, 0, n * sizeof(T));
-        rosen_kernel<<<(n + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE>>>(d_x, (T*)nullptr, d_g, n);
-    }
-};
-
-// Wrapper za not-atomic Rosenbrock test
 template <typename T>
 struct RosenbrockNoAtomTest {
     T* d_temp_f;
+    cublasHandle_t* h = nullptr;
+    void set_handle(cublasHandle_t* ph) { h = ph; }
+    
     RosenbrockNoAtomTest(int n) { cudaMalloc(&d_temp_f, n * sizeof(T)); }
     ~RosenbrockNoAtomTest() { cudaFree(d_temp_f); }
 
@@ -293,7 +370,8 @@ struct RosenbrockNoAtomTest {
         cudaMemset(d_temp_f, 0, n * sizeof(T));
         int blocks = (n + BLOCK_SIZE - 1) / BLOCK_SIZE;
         rosen_fg_kernel_noatom<<<blocks, BLOCK_SIZE>>>(d_x, d_temp_f, (T*)nullptr, n);
-        return gpu_sum(d_temp_f, n); // sum only [0..n-2] meaningful; fine if last is 0
+        float result = gpu_sum_f32_cublas(*h, (float*)d_temp_f, n);
+        return (double)result;
     }
 
     void df(T* d_x, T* d_g, int n) {
@@ -302,6 +380,8 @@ struct RosenbrockNoAtomTest {
     }
 
 };
+
+
 
 // Kernel za računanje Rastriginove funkcije i njenog gradijenta
 template <typename T>
@@ -320,13 +400,17 @@ __global__ void rastrigin_kernel(const T* x, T* f_vals, T* g, int n) {
 template <typename T>
 struct RastriginTest {
     T* d_temp_f;
+    cublasHandle_t* h = nullptr;
+    void set_handle(cublasHandle_t* ph) { h = ph; }
+
     RastriginTest(int n) { cudaMalloc(&d_temp_f, n * sizeof(T)); }
     ~RastriginTest() { cudaFree(d_temp_f); }
 
     double f(T* d_x, int n) {
         rastrigin_kernel<<<(n + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE>>>(d_x, d_temp_f, (T*)nullptr,
                                                                             n);
-        return 10.0 * n + gpu_sum(d_temp_f, n);
+        float result = gpu_sum_f32_cublas(*h, (float*)d_temp_f, n);
+        return 10.0 * n + result;
     }
     void df(T* d_x, T* d_g, int n) {
         rastrigin_kernel<<<(n + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE>>>(d_x, (T*)nullptr, d_g, n);
@@ -350,20 +434,23 @@ __global__ void ackley_kernel(const T* x, T* f_vals, T* g, int n) {
 template <typename T>
 struct AckleyTest {
     T* d_temp_f;
+    cublasHandle_t* h = nullptr;
+    void set_handle(cublasHandle_t* ph) { h = ph; }
+
     AckleyTest(int n) { cudaMalloc(&d_temp_f, n * sizeof(T)); }
     ~AckleyTest() { cudaFree(d_temp_f); }
 
     double f(T* d_x, int n) {
         ackley_kernel<<<(n + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE>>>(d_x, d_temp_f, (T*)nullptr,
                                                                                 n);
-        return gpu_sum(d_temp_f, n);
+        float result = gpu_sum_f32_cublas(*h, (float*)d_temp_f, n);
+        
+        return (double)result;
     }
     void df(T* d_x, T* d_g, int n) {
         ackley_kernel<<<(n + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE>>>(d_x, (T*)nullptr, d_g, n);
     }
 };
-
-
 
 struct Quadratic {
     // f(x) = 0.5 * ||x||^2
@@ -401,14 +488,13 @@ int main() {
 
     // --- TEST 1: QUADRATIC ---
     for (int i = 0; i < N; i++) x0[i] = 8.0;  // Start far away
+    lbfgs<QuadraticTest<T>> opt_quad;
     QuadraticTest<T> quad(N);
-    lbfgs<QuadraticTest<T>> opt;
-
+    
     printf("Starting: Quadratic...\n");
     
     cudaEventRecord(startEvent);
-    opt(N, M, x0, 1000, quad, 1e-6);
-    double final_f = quad.f(x0, N);
+    double final_f = opt_quad(N, M, x0, 1000, quad, 1e-6);
     cudaEventRecord(stopEvent);
 
     cudaEventSynchronize(stopEvent);
@@ -418,12 +504,13 @@ int main() {
 
     // --- TEST 2: ROSENBROCK [-5, 10]^N ---
     for (int i = 0; i < N; i++) x0[i] = -4.2;  // Standard starting point
-    RosenbrockTest<T> rosen(N);
+    lbfgs<RosenbrockNoAtomTest<T>> opt_rosen;
+    RosenbrockNoAtomTest<T> rosen(N);
 
     printf("Starting: Rosenbrock...\n");
 
     cudaEventRecord(startEvent);
-    final_f = lbfgs(N, M, x0, 5000, rosen, 1e-6);
+    final_f = opt_rosen(N, M, x0, 5000, rosen, 1e-6);
     cudaEventRecord(stopEvent);
 
     cudaEventSynchronize(stopEvent);
@@ -454,11 +541,12 @@ int main() {
     // --- TEST 4: Rastrigin [-5.12, 5.12]^N ---
     for (int i = 0; i < N; i++) x0[i] = -1.2;  // Standard starting point
     RastriginTest<T> rastrigin(N);
+    lbfgs<RastriginTest<T>> opt_rastrigin;
 
     printf("Starting: Rastrigin...\n");
 
     cudaEventRecord(startEvent);
-    final_f = lbfgs(N, M, x0, 5000, rastrigin, 1e-6);
+    final_f = opt_rastrigin(N, M, x0, 5000, rastrigin, 1e-6);
     cudaEventRecord(stopEvent);
 
     cudaEventSynchronize(stopEvent);
@@ -469,10 +557,11 @@ int main() {
     // --- TEST 5: Ackley [-32.768, 32.768]^N ---
     for (int i = 0; i < N; i++) x0[i] = -4;
     AckleyTest<T> ackley(N);
+    lbfgs<AckleyTest<T>> opt_ackley;
     printf("Starting: Ackley...\n");
 
     cudaEventRecord(startEvent);
-    final_f = lbfgs(N, M, x0, 5000, ackley, 1e-6);
+    final_f = opt_ackley(N, M, x0, 5000, ackley, 1e-6);
     cudaEventRecord(stopEvent);
 
     cudaEventSynchronize(stopEvent);
