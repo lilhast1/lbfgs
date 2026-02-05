@@ -86,20 +86,31 @@ __global__ void sum_reduction_kernel(const double* input, double* output, int n)
 
 /*----------------------------------------Testovi---------------------------------------------------*/
 
+__global__ void quad_kernel(const double* x, double* f_vals, double* g, int n) {
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i < n) {
+        double xi = x[i];
+        if (f_vals) f_vals[i] = xi * xi;
+        if (g)      g[i] = 2.0 * xi;
+    }
+}
+
 struct QuadraticTest {
     double* d_temp_f;
-    QuadraticTest(int n) {}
-    ~QuadraticTest() {}
+    QuadraticTest(int n) { cudaMalloc(&d_temp_f, n * sizeof(double)); }
+    ~QuadraticTest() { cudaFree(d_temp_f); }
 
     double f(double* d_x, int n) {
-        double s = 0;
-        for (int i = 0; i < n; i++) s += d_x[i] * d_x[i];
-        return s;
+        int blocks = (n + BLOCK_SIZE - 1) / BLOCK_SIZE;
+        quad_kernel<<<blocks, BLOCK_SIZE>>>(d_x, d_temp_f, nullptr, n);
+        return gpu_sum(d_temp_f, n);
     }
     void df(double* d_x, double* d_g, int n) {
-        for (int i = 0; i < n; i++) d_g[i] = 2 * d_x[i];
+        int blocks = (n + BLOCK_SIZE - 1) / BLOCK_SIZE;
+        quad_kernel<<<blocks, BLOCK_SIZE>>>(d_x, nullptr, d_g, n);
     }
 };
+
 
 __global__ void rosen_kernel(const double* x, double* f_vals, double* g, int n) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -175,38 +186,60 @@ int main(int argc, char* argv[]) {
     int M = 10;       // History size
     double* x0 = new double[N];
 
+    cudaEvent_t startEvent, stopEvent;
+    cudaEventCreate(&startEvent);
+    cudaEventCreate(&stopEvent);
+
+    float ms = 0;
+
     // --- TEST 1: QUADRATIC ---
     for (int i = 0; i < N; i++) x0[i] = 5.0;  // Start far away
-    auto start = std::chrono::high_resolution_clock::now();
+    
     QuadraticTest quad(N);
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double, std::milli> duration = end - start;
     printf("Starting Quadratic...\n");
+    
+    cudaEventRecord(startEvent);
     double final_f = lbfgs(N, M, x0, 1000, quad, 1e-6);
+    cudaEventRecord(stopEvent);
+
+    cudaEventSynchronize(stopEvent);
+    cudaEventElapsedTime(&ms, startEvent, stopEvent);
+
     printf("Quadratic Final F: %e (Target: 0)\n", final_f);
-    std::cout << "Time elapsed: " << duration.count() << " ms\n";
+    std::cout << "Time elapsed: " << ms << " ms\n";
 
     // --- TEST 2: ROSENBROCK ---
     for (int i = 0; i < N; i++) x0[i] = -1.2;  // Standard starting point
-    start = std::chrono::high_resolution_clock::now();
     RosenbrockTest rosen(N);
-    end = std::chrono::high_resolution_clock::now();
+
     printf("Starting Rosenbrock...\n");
+    cudaEventRecord(startEvent);
     final_f = lbfgs(N, M, x0, 5000, rosen, 1e-6);
-    duration = end - start;
+    cudaEventRecord(stopEvent);
+
+    cudaEventSynchronize(stopEvent);
+    cudaEventElapsedTime(&ms, startEvent, stopEvent);
+
     printf("Rosenbrock Final F: %e (Target: 0)\n", final_f);
-    std::cout << "Time elapsed: " << duration.count() << " ms\n";
+    std::cout << "Time elapsed: " << ms << " ms\n";
 
     // --- TEST 2: Rastrigin ---
     for (int i = 0; i < N; i++) x0[i] = -1.2;  // Standard starting point
-    start = std::chrono::high_resolution_clock::now();
     RastriginTest rastrigin(N);
-    end = std::chrono::high_resolution_clock::now();
-    duration = end - start;
     printf("Starting Rastrigin...\n");
+    
+    cudaEventRecord(startEvent);
     final_f = lbfgs(N, M, x0, 5000, rastrigin, 1e-6);
+    cudaEventRecord(stopEvent);
+
+    cudaEventSynchronize(stopEvent);
+    cudaEventElapsedTime(&ms, startEvent, stopEvent);
+
     printf("Rastrigin Final F: %e (Target: 0)\n", final_f);
-    std::cout << "Time elapsed: " << duration.count() << " ms\n";
+    std::cout << "Time elapsed: " << ms << " ms\n";
+
+    cudaEventDestroy(startEvent);
+    cudaEventDestroy(stopEvent);
 
     delete[] x0;
 
@@ -425,11 +458,19 @@ double lbfgs(int n, int m, double* x0, int max_itr, Func func, const double eps)
             cudaMemcpy(x.elems, x_old.elems, n * sizeof(double), cudaMemcpyDeviceToDevice);
             axpy<<<cfg.gridSize, cfg.blockSize>>>(step, d.elems, x.elems, n);
 
+            // HASTA: ovdje je neki error, vraća je isključivo isti rezultat, 
+            // ChatGPT rekao da uradim ovo ispod pa je počelo raditi kako treba
+            // Samo Rastrigin ostane vrtiti forever, ne znam zašto
+
             // Copy to host for CPU evaluation
             cudaMemcpy(host_x_trial, x.elems, n * sizeof(double), cudaMemcpyDeviceToHost);
             cudaDeviceSynchronize();
             double f_new = func.f(host_x_trial, n);
-
+            
+// ovo sam mijenjao
+//            double f_new = func.f(x.elems, n);
+//            cudaDeviceSynchronize();
+            
             // Armijo Condition
             if (f_new <= val + c1 * step * g_dot_d) {
                 val = f_new;
