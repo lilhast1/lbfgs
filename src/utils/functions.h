@@ -5,6 +5,14 @@
 
 using vec = double*;
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
+#ifndef M_E
+#define M_E 2.71828182845904523536
+#endif
+
 struct Func {
     virtual double operator()(const vec& x, int n) = 0;
     virtual void df(const vec& x, vec& g, int n) = 0;

@@ -1,25 +1,5 @@
-// lbfgs_mixed_precision.cu
-//
-// Adds templating + FP16 support (recommended mode: FP16 storage with FP32 accumulation).
-//
-// Build (example):
-//   nvcc -O3 -std=c++17 lbfgs_mixed_precision.cu -o lbfgs
-//
-// Switch precision by changing Scalar below:
-//   using Scalar = double;   // FP64 baseline
-//   using Scalar = float;    // FP32
-//   using Scalar = __half;   // FP16 storage + FP32 accum (recommended)
-//
-// NOTE:
-// - For FP16, we accumulate dot/reductions in float (Accum = float).
-// - Objective/gradient kernels are templated for double/float and have FP16-specialized versions.
-// - Here, f(x) is evaluated on GPU consistently
-//
-
 #include <cuda.h>
 #include <cuda_runtime.h>
-#include <cuda_fp16.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -30,85 +10,19 @@
 #include <stdexcept>
 #include <string>
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
+#include "src/utils/functions.h"
 
 #define BLOCK_SIZE 64
 
-// =========================
-//  Precision / Traits
-// =========================
-template <typename T>
-struct NumericTraits;
+double gpu_sum(double* d_elements, int n);
 
-template <>
-struct NumericTraits<double> {
-    using Accum = double;
-    __host__ __device__ static constexpr double zero() { return 0.0; }
-    __host__ __device__ static constexpr double one() { return 1.0; }
-};
+/*----------------------------------------Datatypes---------------------------------------------------*/
 
-template <>
-struct NumericTraits<float> {
-    using Accum = float;
-    __host__ __device__ static constexpr float zero() { return 0.0f; }
-    __host__ __device__ static constexpr float one() { return 1.0f; }
-};
-
-template <>
-struct NumericTraits<__half> {
-    using Accum = float;  // IMPORTANT: accumulate in FP32
-    __host__ __device__ static __half zero() { return __float2half(0.0f); }
-    __host__ __device__ static __half one() { return __float2half(1.0f); }
-};
-
-// Scalar conversions (device-safe)
-__host__ __device__ inline double to_double(double x) { return x; }
-__host__ __device__ inline double to_double(float x) { return (double)x; }
-__host__ __device__ inline double to_double(__half x) { return (double)__half2float(x); }
-
-__host__ __device__ inline float to_float(double x) { return (float)x; }
-__host__ __device__ inline float to_float(float x) { return x; }
-__host__ __device__ inline float to_float(__half x) { return __half2float(x); }
-
-__host__ __device__ inline double from_double(double x) { return x; }
-__host__ __device__ inline float from_double_f(float x) { return x; }
-__host__ __device__ inline __half from_float_half(float x) { return __float2half(x); }
-
-// Generic scalar multiply-add for device code
-template <typename T>
-__host__ __device__ inline T madd(T a, T b, T c) {
-    return a * b + c;
-}
-template <>
-__host__ __device__ inline __half madd(__half a, __half b, __half c) {
-    float af = __half2float(a);
-    float bf = __half2float(b);
-    float cf = __half2float(c);
-    return __float2half(af * bf + cf);
-}
-
-// =========================
-//  Error checking
-// =========================
-inline void cudaCheck(cudaError_t e, const char* msg) {
-    if (e != cudaSuccess) {
-        std::cerr << "CUDA error: " << msg << " : " << cudaGetErrorString(e) << std::endl;
-        throw std::runtime_error("CUDA failure");
-    }
-}
-
-// =========================
-//  Datatypes (templated)
-// =========================
 template <typename T>
 struct GpuMatrix {
     int n, m;
     T* elems;
-    GpuMatrix(int n, int m) : n(n), m(m), elems(nullptr) {
-        cudaCheck(cudaMalloc(&elems, (size_t)n * (size_t)m * sizeof(T)), "cudaMalloc GpuMatrix");
-    }
+    GpuMatrix(int n, int m) : n(n), m(m) { cudaMalloc(&elems, n * m * sizeof(T)); }
     ~GpuMatrix() { cudaFree(elems); }
 };
 
@@ -116,9 +30,7 @@ template <typename T>
 struct GpuVector {
     int n;
     T* elems;
-    GpuVector(int n) : n(n), elems(nullptr) {
-        cudaCheck(cudaMalloc(&elems, (size_t)n * sizeof(T)), "cudaMalloc GpuVector");
-    }
+    GpuVector(int n) : n(n) { cudaMalloc(&elems, n * sizeof(T)); }
     ~GpuVector() { cudaFree(elems); }
 };
 
@@ -126,27 +38,20 @@ template <typename T>
 struct UnifiedVector {
     int n;
     T* elems;
-    UnifiedVector(int n) : n(n), elems(nullptr) {
-        cudaCheck(cudaMallocManaged(&elems, (size_t)n * sizeof(T)), "cudaMallocManaged UnifiedVector");
-    }
+    UnifiedVector(int n) : n(n) { cudaMallocManaged(&elems, n * sizeof(T)); }
     ~UnifiedVector() { cudaFree(elems); }
 };
 
-// Dot lookup table stores partial sums in Accum (float for half)
-template <typename Scalar>
+template <typename T>
 struct DotLookupTable {
-    using Acc = typename NumericTraits<Scalar>::Accum;
-
-    Acc* d_partial;
-    Acc* h_partial;
+    T* d_partial;
+    T* h_partial;
     int max_grid_size;
 
-    DotLookupTable(int n) : d_partial(nullptr), h_partial(nullptr), max_grid_size(0) {
+    DotLookupTable(int n) {
         max_grid_size = (n + BLOCK_SIZE - 1) / BLOCK_SIZE;
-        cudaCheck(cudaMalloc(&d_partial, (size_t)max_grid_size * sizeof(Acc)), "cudaMalloc d_partial");
-        h_partial = (Acc*)malloc((size_t)max_grid_size * sizeof(Acc));
-        if (!h_partial) throw std::bad_alloc();
-        clean();
+        cudaMalloc(&d_partial, max_grid_size * sizeof(T));
+        h_partial = (T*)malloc(max_grid_size * sizeof(T));
     }
     ~DotLookupTable() {
         cudaFree(d_partial);
@@ -154,8 +59,8 @@ struct DotLookupTable {
     }
 
     void clean() {
-        cudaMemset(d_partial, 0, (size_t)max_grid_size * sizeof(Acc));
-        memset(h_partial, 0, (size_t)max_grid_size * sizeof(Acc));
+        cudaMemset(d_partial, 0, max_grid_size * sizeof(T));
+        memset(h_partial, 0, max_grid_size * sizeof(T));
     }
 };
 
@@ -163,68 +68,285 @@ struct KernelConfig {
     int blockSize;
     int gridSize;
 
-    KernelConfig(int n) : blockSize(256), gridSize(0) {
-        int numSMs = 0;
+    KernelConfig(int n) {
+        blockSize = 256;
+        int numSMs;
         cudaDeviceGetAttribute(&numSMs, cudaDevAttrMultiProcessorCount, 0);
         gridSize = 32 * numSMs;
         int maxBlocks = (n + blockSize - 1) / blockSize;
-        if (gridSize > maxBlocks) gridSize = maxBlocks;
-        if (gridSize < 1) gridSize = 1;
+        if (gridSize > maxBlocks)
+            gridSize = maxBlocks;
     }
 };
 
-// =========================
-//  Kernels (templated)
-// =========================
+/*----------------------------------------KERNELI---------------------------------------------------*/
+
+// CUDA kernel. Each thread takes care of one element of c, each thread block preforms reduction
+
+template <typename T>
+__global__ void dotProduct(const T* a, const T* b, T* c, int n);
+
+template <typename T>
+__global__ void setVectorScalar(T* r, const T* q, T factor, int n);
+
+template <typename T>
+__global__ void axpy(T alpha, const T* x, T* y, int n);
+
+template <typename T>
+__global__ void mulVecScal(T alpha, const T* x, T* y, int n);
+
+template <typename T>
+__global__ void sum_reduction_kernel(const T* input, T* output, int n);
+
+/*----------------------------------------Testovi---------------------------------------------------*/
+
+template <typename T>
+__global__ void quad_kernel(const T* x, T* f_vals, T* g, int n) {
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i < n) {
+        T xi = x[i];
+        if (f_vals) f_vals[i] = xi * xi;
+        if (g)      g[i] = (T)2 * xi;
+    }
+}
+
+template <typename T>
+struct QuadraticTest {
+    T* d_temp_f;
+
+    QuadraticTest(int n) : d_temp_f(nullptr) {
+        cudaMalloc(&d_temp_f, n * sizeof(T));
+    }
+    ~QuadraticTest() {
+        if (d_temp_f) cudaFree(d_temp_f);
+    }
+
+    double f(T* d_x, int n) {
+        int blocks = (n + BLOCK_SIZE - 1) / BLOCK_SIZE;
+        quad_kernel<T><<<blocks, BLOCK_SIZE>>>(d_x, d_temp_f, (T*)nullptr, n);
+        return gpu_sum(d_temp_f, n);
+    }
+
+    void df(T* d_x, T* d_g, int n) {
+        int blocks = (n + BLOCK_SIZE - 1) / BLOCK_SIZE;
+        quad_kernel<T><<<blocks, BLOCK_SIZE>>>(d_x, (T*)nullptr, d_g, n);
+    }
+};
+
+template <typename T>
+__global__ void rosen_kernel(const T* x, T* f_vals, T* g, int n) {
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i < n - 1) {
+        T x_curr = x[i];
+        T x_next = x[i + 1];
+        T t1 = (x_next - x_curr * x_curr);
+        T t2 = (1.0 - x_curr);
+
+        if (f_vals)
+            f_vals[i] = 100.0 * t1 * t1 + t2 * t2;
+
+        // Gradient components (requires atomicAdd because indices overlap)
+        if (g) {
+            atomicAdd(&g[i], -400.0 * x_curr * t1 - 2.0 * t2);
+            atomicAdd(&g[i + 1], 200.0 * t1);
+        }
+    }
+}
+
+template <typename T>
+struct RosenbrockTest {
+    T* d_temp_f;
+    RosenbrockTest(int n) { cudaMalloc(&d_temp_f, n * sizeof(T)); }
+    ~RosenbrockTest() { cudaFree(d_temp_f); }
+
+    double f(T* d_x, int n) {
+        cudaMemset(d_temp_f, 0, n * sizeof(T));
+        rosen_kernel<<<(n + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE>>>(d_x, d_temp_f, (T*)nullptr, n);
+        return gpu_sum(d_temp_f, n);
+    }
+    void df(T* d_x, T* d_g, int n) {
+        cudaMemset(d_g, 0, n * sizeof(T));
+        rosen_kernel<<<(n + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE>>>(d_x, (T*)nullptr, d_g, n);
+    }
+};
+
+template <typename T>
+__global__ void rastrigin_kernel(const T* x, T* f_vals, T* g, int n) {
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i < n) {
+        T xi = x[i];
+        if (f_vals)
+            f_vals[i] = xi * xi - 10.0 * cos(2.0 * M_PI * xi);
+        if (g)
+            g[i] = 2.0 * xi + 20.0 * M_PI * sin(2.0 * M_PI * xi);
+    }
+}
+
+template <typename T>
+struct RastriginTest {
+    T* d_temp_f;
+    RastriginTest(int n) { cudaMalloc(&d_temp_f, n * sizeof(T)); }
+    ~RastriginTest() { cudaFree(d_temp_f); }
+
+    double f(T* d_x, int n) {
+        rastrigin_kernel<<<(n + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE>>>(d_x, d_temp_f, (T*)nullptr,
+                                                                            n);
+        return 10.0 * n + gpu_sum(d_temp_f, n);
+    }
+    void df(T* d_x, T* d_g, int n) {
+        rastrigin_kernel<<<(n + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE>>>(d_x, (T*)nullptr, d_g, n);
+    }
+};
+
+/*----------------------------------------Wrapperfje---------------------------------------------------*/
+
+// neka su vektori a i b na gpu alocirani vraca a . b
+template <typename T>
+double dot(const T* a, const T* b, int n, DotLookupTable<T>* context = nullptr);
+
+template <typename Func, typename T>
+double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps = 1e-9);
+
+int main(int argc, char* argv[]) {
+
+    //using T = double;
+    using T = float;
+    
+    int N = 1 << 16;  // Problem size
+    int M = 10;       // History size
+    T* x0 = new T[N];
+
+    cudaEvent_t startEvent, stopEvent;
+    cudaEventCreate(&startEvent);
+    cudaEventCreate(&stopEvent);
+    
+    float elapsedTime;
+
+    // --- TEST 1: QUADRATIC ---
+    for (int i = 0; i < N; i++) x0[i] = 5.0;  // Start far away
+    QuadraticTest<T> quad(N);
+    
+    printf("Starting Quadratic...\n");
+    
+    cudaEventRecord(startEvent);
+    double final_f = lbfgs(N, M, x0, 1000, quad, 1e-6);
+    cudaEventRecord(stopEvent);
+
+    cudaEventSynchronize(stopEvent);
+    cudaEventElapsedTime(&elapsedTime, startEvent, stopEvent);
+    printf("Quadratic Final F: %e (Target: 0)\n", final_f);
+    std::cout << "Time elapsed: " << elapsedTime << " ms\n";
+
+    // --- TEST 2: ROSENBROCK ---
+    for (int i = 0; i < N; i++) x0[i] = -1.2;  // Standard starting point
+    RosenbrockTest<T> rosen(N);
+
+    printf("Starting Rosenbrock...\n");
+
+    cudaEventRecord(startEvent);
+    final_f = lbfgs(N, M, x0, 5000, rosen, 1e-6);
+    cudaEventRecord(stopEvent);
+
+    cudaEventSynchronize(stopEvent);
+    cudaEventElapsedTime(&elapsedTime, startEvent, stopEvent);
+    printf("Rosenbrock Final F: %e (Target: 0)\n", final_f);
+    std::cout << "Time elapsed: " << elapsedTime << " ms\n";
+
+    // --- TEST 2: Rastrigin ---
+    for (int i = 0; i < N; i++) x0[i] = -1.2;  // Standard starting point
+    RastriginTest<T> rastrigin(N);
+
+    printf("Starting Rastrigin...\n");
+
+    cudaEventRecord(startEvent);
+    final_f = lbfgs(N, M, x0, 5000, rastrigin, 1e-6);
+    cudaEventRecord(stopEvent);
+
+    cudaEventSynchronize(stopEvent);
+    cudaEventElapsedTime(&elapsedTime, startEvent, stopEvent);
+    printf("Rastrigin Final F: %e (Target: 0)\n", final_f);
+    std::cout << "Time elapsed: " << elapsedTime << " ms\n";
+
+    delete[] x0;
+
+    cudaEventDestroy(startEvent);
+    cudaEventDestroy(stopEvent);
+
+    return 0;
+}
+
+/*----------------------------------------IMPL---------------------------------------------------*/
+
+/*----------------------------------------Datatypes---------------------------------------------------*/
+
+/*----------------------------------------KERNELI---------------------------------------------------*/
+
+template <typename T>
+__global__ void mulVecScal(T alpha, const T* x, T* y, int n) {
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i < n)
+        y[i] += alpha * x[i];
+}
 
 // y = y + alpha * x
 template <typename T>
-__global__ void axpy_kernel(T alpha, const T* x, T* y, int n) {
+__global__ void axpy(T alpha, const T* x, T* y, int n) {
     for (int i = blockIdx.x * blockDim.x + threadIdx.x; i < n; i += blockDim.x * gridDim.x) {
-        y[i] = madd(alpha, x[i], y[i]);
+        y[i] += alpha * x[i];
     }
 }
 
 // r = factor * q
 template <typename T>
-__global__ void setVectorScalar_kernel(T* r, const T* q, T factor, int n) {
+__global__ void setVectorScalar(T* r, const T* q, T factor, int n) {
     for (int i = blockIdx.x * blockDim.x + threadIdx.x; i < n; i += blockDim.x * gridDim.x) {
-        // r[i] = q[i] * factor
-        if constexpr (std::is_same<T, __half>::value) {
-            float qi = __half2float(q[i]);
-            float fi = __half2float(factor);
-            r[i] = __float2half(qi * fi);
-        } else {
-            r[i] = q[i] * factor;
-        }
+        r[i] = q[i] * factor;
     }
 }
 
-// Dot product partial reduction kernel
-template <typename Scalar>
-__global__ void dotProduct_kernel(
-    const Scalar* a,
-    const Scalar* b,
-    typename NumericTraits<Scalar>::Accum* c,
-    int n
-) {
-    using Acc = typename NumericTraits<Scalar>::Accum;
-    __shared__ Acc buf[BLOCK_SIZE];
-
+template <typename T>
+__global__ void dotProduct(const T* a, const T* b, T* c, int n) {
+    // Get global thread ID
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
-    Acc sum = (Acc)0;
+    __shared__ T buf[BLOCK_SIZE];
+
+    // Initialize shared buffer
+    buf[threadIdx.x] = 0;
+
+    // Make sure we do not go out of bounds
     while (tid < n) {
-        if constexpr (std::is_same<Scalar, __half>::value) {
-            float af = __half2float(a[tid]);
-            float bf = __half2float(b[tid]);
-            sum += (Acc)(af * bf);
-        } else {
-            sum += (Acc)(a[tid] * b[tid]);
-        }
+        buf[threadIdx.x] += a[tid] * b[tid];
         tid += gridDim.x * blockDim.x;
     }
 
+    __syncthreads();
+
+    // Reduction:
+    int i = blockDim.x / 2;
+    while (i != 0) {
+        if (threadIdx.x < i) {
+            // perform the addition:
+            buf[threadIdx.x] += buf[threadIdx.x + i];
+        }
+        // wait at the barrier:
+        __syncthreads();
+        i = i / 2;
+    }
+
+    // only one thread in block writes the result:
+    if (threadIdx.x == 0) {
+        c[blockIdx.x] = buf[0];
+    }
+}
+
+__global__ void dot_atomic_f32(const float* a, const float* b, float* out, int n) {
+    float sum = 0.0f;
+    for (int i = blockIdx.x * blockDim.x + threadIdx.x; i < n; i += blockDim.x * gridDim.x)
+        sum += a[i] * b[i];
+
+    // block reduce in shared
+    __shared__ float buf[256];
     buf[threadIdx.x] = sum;
     __syncthreads();
 
@@ -232,76 +354,76 @@ __global__ void dotProduct_kernel(
         if (threadIdx.x < s) buf[threadIdx.x] += buf[threadIdx.x + s];
         __syncthreads();
     }
-
-    if (threadIdx.x == 0) c[blockIdx.x] = buf[0];
+    if (threadIdx.x == 0) atomicAdd(out, buf[0]);
 }
 
-// Sum reduction to single Acc using atomicAdd
-template <typename Acc>
-__global__ void sum_reduction_kernel_acc(const Acc* input, Acc* output, int n) {
-    __shared__ Acc sdata[BLOCK_SIZE];
+template <typename T>
+__global__ void sum_reduction_kernel(const T* input, T* output, int n) {
+    __shared__ T sdata[BLOCK_SIZE];
     int tid = threadIdx.x;
     int i = blockIdx.x * blockDim.x + threadIdx.x;
 
-    Acc val = (i < n) ? input[i] : (Acc)0;
+    T val = (i < n) ? input[i] : 0.0;
     sdata[tid] = val;
     __syncthreads();
 
     for (int s = blockDim.x / 2; s > 0; s >>= 1) {
-        if (tid < s) sdata[tid] += sdata[tid + s];
+        if (tid < s)
+            sdata[tid] += sdata[tid + s];
         __syncthreads();
     }
-    if (tid == 0) atomicAdd(output, sdata[0]);
+    if (tid == 0)
+        atomicAdd(output, sdata[0]);
 }
 
-// =========================
-//  Wrappers: gpu_sum, dot
-// =========================
-template <typename Acc>
-Acc gpu_sum_acc(const Acc* d_elements, int n) {
-    static Acc* d_res = nullptr;
-    if (!d_res) cudaCheck(cudaMalloc(&d_res, sizeof(Acc)), "cudaMalloc d_res");
+/*----------------------------------------Wrapperfje---------------------------------------------------*/
 
-    cudaCheck(cudaMemset(d_res, 0, sizeof(Acc)), "cudaMemset d_res");
+// Helper to get sum of a device array
+    
+template <typename T>
+double gpu_sum(T* d_elements, int n) {
+    static T* d_res = nullptr;
+    if (!d_res)
+        cudaMalloc(&d_res, sizeof(T));
+
+    cudaMemset(d_res, 0, sizeof(T));
     int blocks = (n + BLOCK_SIZE - 1) / BLOCK_SIZE;
-    sum_reduction_kernel_acc<<<blocks, BLOCK_SIZE>>>(d_elements, d_res, n);
-    cudaCheck(cudaGetLastError(), "sum_reduction_kernel_acc launch");
+    sum_reduction_kernel<<<blocks, BLOCK_SIZE>>>(d_elements, d_res, n);
 
-    Acc h_res;
-    cudaCheck(cudaMemcpy(&h_res, d_res, sizeof(Acc), cudaMemcpyDeviceToHost), "cudaMemcpy d_res->host");
-    return h_res;
+    T h_res{};
+    cudaMemcpy(&h_res, d_res, sizeof(T), cudaMemcpyDeviceToHost);
+    return (double)h_res;
 }
 
-template <typename Scalar>
-typename NumericTraits<Scalar>::Accum
-dot(const Scalar* a, const Scalar* b, int n, DotLookupTable<Scalar>* context = nullptr) {
-    using Acc = typename NumericTraits<Scalar>::Accum;
+template <typename T>
+double dot(const T* a, const T* b, int n, DotLookupTable<T>* context) {
+    dim3 blockSize = BLOCK_SIZE;
+    dim3 gridSize = (n + blockSize.x - 1) / blockSize.x;
 
-    dim3 blockSize(BLOCK_SIZE);
-    dim3 gridSize((n + blockSize.x - 1) / blockSize.x);
-    if (gridSize.x < 1) gridSize.x = 1;
+    auto datasize = sizeof(T) * n;
+    auto partial_results_size = sizeof(T) * gridSize.x;
 
-    size_t partial_results_size = (size_t)gridSize.x * sizeof(Acc);
-
-    Acc *d_c = nullptr, *h_c = nullptr;
+    T *d_c, *h_c;  // parcijalne sume
 
     if (!context) {
-        h_c = (Acc*)malloc(partial_results_size);
-        if (!h_c) throw std::bad_alloc();
-        cudaCheck(cudaMalloc(&d_c, partial_results_size), "cudaMalloc d_c partial");
-        dotProduct_kernel<<<gridSize, blockSize>>>(a, b, d_c, n);
-        cudaCheck(cudaGetLastError(), "dotProduct_kernel launch");
-        cudaCheck(cudaMemcpy(h_c, d_c, partial_results_size, cudaMemcpyDeviceToHost), "cudaMemcpy partial->host");
+        h_c = (T*)malloc(partial_results_size);
+        cudaMalloc(&d_c, partial_results_size);
+        dotProduct<<<gridSize, blockSize>>>(a, b, d_c, n);
     } else {
-        dotProduct_kernel<<<gridSize, blockSize>>>(a, b, context->d_partial, n);
-        cudaCheck(cudaGetLastError(), "dotProduct_kernel (context) launch");
-        cudaCheck(cudaMemcpy(context->h_partial, context->d_partial, partial_results_size, cudaMemcpyDeviceToHost),
-                  "cudaMemcpy ctx partial->host");
+        dotProduct<<<gridSize, blockSize>>>(a, b, context->d_partial, n);
+    }
+
+    // redukcija
+    if (!context) {
+        cudaMemcpy(h_c, d_c, partial_results_size, cudaMemcpyDeviceToHost);
+    } else {
+        cudaMemcpy(context->h_partial, context->d_partial, partial_results_size,
+                   cudaMemcpyDeviceToHost);
         h_c = context->h_partial;
     }
 
-    Acc result = (Acc)0;
-    for (int i = 0; i < (int)gridSize.x; i++) result += h_c[i];
+    double result = 0.0;
+    for (int i = 0; i < gridSize.x; i++) result += h_c[i];
 
     if (!context) {
         cudaFree(d_c);
@@ -313,317 +435,155 @@ dot(const Scalar* a, const Scalar* b, int n, DotLookupTable<Scalar>* context = n
     return result;
 }
 
-// =========================
-//  Test functions (templated)
-// =========================
 
-template <typename Scalar>
-__global__ void quadratic_kernel(const Scalar* x, typename NumericTraits<Scalar>::Accum* f_vals, Scalar* g, int n) {
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
-    if (i < n) {
-        float xi = to_float(x[i]);
-        if (f_vals) f_vals[i] = (typename NumericTraits<Scalar>::Accum)(xi * xi);
-        if (g) {
-            float gi = 2.0f * xi;
-            if constexpr (std::is_same<Scalar, __half>::value) g[i] = __float2half(gi);
-            else g[i] = (Scalar)gi;
-        }
-    }
+inline float dot_f32(const float* a, const float* b, int n, KernelConfig cfg) {
+    static float* d_out = nullptr;
+    if (!d_out) cudaMalloc(&d_out, sizeof(float));
+    cudaMemset(d_out, 0, sizeof(float));
+    dot_atomic_f32<<<cfg.gridSize, 256>>>(a, b, d_out, n);
+    float h;
+    cudaMemcpy(&h, d_out, sizeof(float), cudaMemcpyDeviceToHost);
+    return h;
 }
 
-template <typename Scalar>
-struct QuadraticTest {
-    using Acc = typename NumericTraits<Scalar>::Accum;
-    Acc* d_temp_f;
-    int n;
 
-    QuadraticTest(int n) : d_temp_f(nullptr), n(n) {
-        cudaCheck(cudaMalloc(&d_temp_f, (size_t)n * sizeof(Acc)), "cudaMalloc Quadratic d_temp_f");
-    }
-    ~QuadraticTest() { cudaFree(d_temp_f); }
+#ifndef CUDA_CHECK
+#define CUDA_CHECK(call) do {                                  \
+  cudaError_t _e = (call);                                     \
+  if (_e != cudaSuccess) {                                     \
+    printf("CUDA error %s:%d: %s\n", __FILE__, __LINE__,        \
+           cudaGetErrorString(_e));                            \
+    std::abort();                                              \
+  }                                                            \
+} while(0)
+#endif
 
-    Acc f(const Scalar* d_x, int n_) {
-        (void)n_;
-        int blocks = (n + BLOCK_SIZE - 1) / BLOCK_SIZE;
-        quadratic_kernel<<<blocks, BLOCK_SIZE>>>(d_x, d_temp_f, nullptr, n);
-        cudaCheck(cudaGetLastError(), "quadratic_kernel f launch");
-        return gpu_sum_acc(d_temp_f, n);
-    }
+template <typename Func, typename T>
+double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps) {
+    UnifiedVector<T> x(n), g(n);
+    GpuVector<T> x_old(n), g_old(n), d(n), q(n), r(n);
+    GpuMatrix<T> S(n, m), Y(n, m);
 
-    void df(const Scalar* d_x, Scalar* d_g, int n_) {
-        (void)n_;
-        int blocks = (n + BLOCK_SIZE - 1) / BLOCK_SIZE;
-        quadratic_kernel<<<blocks, BLOCK_SIZE>>>(d_x, nullptr, d_g, n);
-        cudaCheck(cudaGetLastError(), "quadratic_kernel df launch");
-    }
-};
+    // NOTE: host_x_trial is no longer needed because we evaluate f(x) on DEVICE
+    // (and your Rosenbrock/Rastrigin tests expect device pointers).
+    // Keep it removed to avoid accidental host-pointer calls.
+    // T* host_x_trial = (T*)malloc(n * sizeof(T));
 
-template <typename Scalar>
-__global__ void rosen_kernel_t(const Scalar* x, typename NumericTraits<Scalar>::Accum* f_vals, Scalar* g, int n) {
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
-    if (i < n - 1) {
-        float x_curr = to_float(x[i]);
-        float x_next = to_float(x[i + 1]);
-        float t1 = (x_next - x_curr * x_curr);
-        float t2 = (1.0f - x_curr);
+    T* rho        = new T[m];
+    T* alpha_hist = new T[m];
+    for (int i = 0; i < m; ++i) { rho[i] = (T)0; alpha_hist[i] = (T)0; }
 
-        if (f_vals) f_vals[i] = (typename NumericTraits<Scalar>::Accum)(100.0f * t1 * t1 + t2 * t2);
-
-        if (g) {
-            // Atomic adds in Accum space, then cast back is messy; for simplicity, do atomic on float for FP16/FP32,
-            // and on double for FP64.
-            if constexpr (std::is_same<Scalar, double>::value) {
-                atomicAdd((double*)&g[i], (double)(-400.0f * x_curr * t1 - 2.0f * t2));
-                atomicAdd((double*)&g[i + 1], (double)(200.0f * t1));
-            } else {
-                // For float/half, keep a float gradient buffer (handled in test struct)
-                // This path should not be used directly.
-            }
-        }
-    }
-}
-
-template <typename Scalar>
-__global__ void rosen_grad_float_kernel(const Scalar* x, float* g_float, int n) {
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
-    if (i < n - 1) {
-        float x_curr = to_float(x[i]);
-        float x_next = to_float(x[i + 1]);
-        float t1 = (x_next - x_curr * x_curr);
-        float t2 = (1.0f - x_curr);
-
-        atomicAdd(&g_float[i], -400.0f * x_curr * t1 - 2.0f * t2);
-        atomicAdd(&g_float[i + 1], 200.0f * t1);
-    }
-}
-
-template <typename Scalar>
-__global__ void cast_float_to_scalar_kernel(const float* src, Scalar* dst, int n) {
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
-    if (i < n) {
-        float v = src[i];
-        if constexpr (std::is_same<Scalar, __half>::value) dst[i] = __float2half(v);
-        else dst[i] = (Scalar)v;
-    }
-}
-
-template <typename Scalar>
-struct RosenbrockTest {
-    using Acc = typename NumericTraits<Scalar>::Accum;
-    Acc* d_temp_f;
-    float* d_g_float;  // for half/float gradients
-    int n;
-
-    RosenbrockTest(int n) : d_temp_f(nullptr), d_g_float(nullptr), n(n) {
-        cudaCheck(cudaMalloc(&d_temp_f, (size_t)n * sizeof(Acc)), "cudaMalloc Rosen d_temp_f");
-        if constexpr (!std::is_same<Scalar, double>::value) {
-            cudaCheck(cudaMalloc(&d_g_float, (size_t)n * sizeof(float)), "cudaMalloc Rosen d_g_float");
-        }
-    }
-    ~RosenbrockTest() {
-        cudaFree(d_temp_f);
-        if (d_g_float) cudaFree(d_g_float);
-    }
-
-    Acc f(const Scalar* d_x, int n_) {
-        (void)n_;
-        cudaCheck(cudaMemset(d_temp_f, 0, (size_t)n * sizeof(Acc)), "cudaMemset Rosen d_temp_f");
-        int blocks = (n + BLOCK_SIZE - 1) / BLOCK_SIZE;
-        rosen_kernel_t<<<blocks, BLOCK_SIZE>>>(d_x, d_temp_f, (Scalar*)nullptr, n);
-        cudaCheck(cudaGetLastError(), "rosen_kernel_t f launch");
-        return gpu_sum_acc(d_temp_f, n);
-    }
-
-    void df(const Scalar* d_x, Scalar* d_g, int n_) {
-        (void)n_;
-        int blocks = (n + BLOCK_SIZE - 1) / BLOCK_SIZE;
-
-        if constexpr (std::is_same<Scalar, double>::value) {
-            cudaCheck(cudaMemset(d_g, 0, (size_t)n * sizeof(Scalar)), "cudaMemset Rosen g");
-            // For double only, reuse rosen_kernel_t atomic on g
-            rosen_kernel_t<<<blocks, BLOCK_SIZE>>>(d_x, (Acc*)nullptr, d_g, n);
-            cudaCheck(cudaGetLastError(), "rosen_kernel_t df launch");
-        } else {
-            cudaCheck(cudaMemset(d_g_float, 0, (size_t)n * sizeof(float)), "cudaMemset Rosen g_float");
-            rosen_grad_float_kernel<<<blocks, BLOCK_SIZE>>>(d_x, d_g_float, n);
-            cudaCheck(cudaGetLastError(), "rosen_grad_float_kernel launch");
-            cast_float_to_scalar_kernel<<<blocks, BLOCK_SIZE>>>(d_g_float, d_g, n);
-            cudaCheck(cudaGetLastError(), "cast_float_to_scalar_kernel launch");
-        }
-    }
-};
-
-template <typename Scalar>
-__global__ void rastrigin_kernel_t(const Scalar* x, typename NumericTraits<Scalar>::Accum* f_vals, Scalar* g, int n) {
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
-    if (i < n) {
-        float xi = to_float(x[i]);
-        if (f_vals) f_vals[i] = (typename NumericTraits<Scalar>::Accum)(xi * xi - 10.0f * cosf(2.0f * (float)M_PI * xi));
-        if (g) {
-            float gi = 2.0f * xi + 20.0f * (float)M_PI * sinf(2.0f * (float)M_PI * xi);
-            if constexpr (std::is_same<Scalar, __half>::value) g[i] = __float2half(gi);
-            else g[i] = (Scalar)gi;
-        }
-    }
-}
-
-template <typename Scalar>
-struct RastriginTest {
-    using Acc = typename NumericTraits<Scalar>::Accum;
-    Acc* d_temp_f;
-    int n;
-
-    RastriginTest(int n) : d_temp_f(nullptr), n(n) {
-        cudaCheck(cudaMalloc(&d_temp_f, (size_t)n * sizeof(Acc)), "cudaMalloc Rastrigin d_temp_f");
-    }
-    ~RastriginTest() { cudaFree(d_temp_f); }
-
-    Acc f(const Scalar* d_x, int n_) {
-        (void)n_;
-        int blocks = (n + BLOCK_SIZE - 1) / BLOCK_SIZE;
-        rastrigin_kernel_t<<<blocks, BLOCK_SIZE>>>(d_x, d_temp_f, (Scalar*)nullptr, n);
-        cudaCheck(cudaGetLastError(), "rastrigin_kernel_t f launch");
-        Acc base = (Acc)(10.0f * (float)n);
-        return base + gpu_sum_acc(d_temp_f, n);
-    }
-
-    void df(const Scalar* d_x, Scalar* d_g, int n_) {
-        (void)n_;
-        int blocks = (n + BLOCK_SIZE - 1) / BLOCK_SIZE;
-        rastrigin_kernel_t<<<blocks, BLOCK_SIZE>>>(d_x, (Acc*)nullptr, d_g, n);
-        cudaCheck(cudaGetLastError(), "rastrigin_kernel_t df launch");
-    }
-};
-
-// =========================
-//  L-BFGS (templated)
-// =========================
-template <typename Scalar, typename Func>
-typename NumericTraits<Scalar>::Accum
-lbfgs(int n, int m, Scalar* x0, int max_itr, Func func, typename NumericTraits<Scalar>::Accum eps) {
-    using Acc = typename NumericTraits<Scalar>::Accum;
-
-    UnifiedVector<Scalar> x(n), g(n);
-    GpuVector<Scalar> x_old(n), g_old(n), d(n), q(n), r(n);
-    GpuMatrix<Scalar> S(n, m), Y(n, m);
-
-    // Host history scalars in Acc
-    Acc* rho = new Acc[m];
-    Acc* alpha_hist = new Acc[m];
-    for (int i = 0; i < m; i++) {
-        rho[i] = (Acc)0;
-        alpha_hist[i] = (Acc)0;
-    }
-
-    DotLookupTable<Scalar> dw(n);
+    DotLookupTable<T> dw(n);
     KernelConfig cfg(n);
 
-    cudaCheck(cudaMemcpy(x.elems, x0, (size_t)n * sizeof(Scalar), cudaMemcpyHostToDevice), "cudaMemcpy x0->x");
 
-    Acc val = func.f(x.elems, n);
+
+    CUDA_CHECK(cudaMemcpy(x.elems, x0, n * sizeof(T), cudaMemcpyHostToDevice));
+
+    double val = func.f(x.elems, n);
     func.df(x.elems, g.elems, n);
+    CUDA_CHECK(cudaDeviceSynchronize());
+
+    int mem = 0;            // how many (s,y) pairs are valid: 0..m
+    bool restart = false;   // forces steepest descent direction next iter
 
     for (int k = 0; k < max_itr; k++) {
-        Acc g_norm = (Acc)std::sqrt((double)dot(x.elems ? g.elems : g.elems, g.elems, n, &dw));
+        // gradient norm
+        double g_norm = std::sqrt(dot_f32(g.elems, g.elems, n, cfg));
         if (g_norm < eps) break;
 
-        // 1) Search direction
-        if (k == 0) {
-            // d = -g
-            if constexpr (std::is_same<Scalar, __half>::value) {
-                setVectorScalar_kernel<<<cfg.gridSize, cfg.blockSize>>>(d.elems, g.elems, __float2half(-1.0f), n);
-            } else {
-                setVectorScalar_kernel<<<cfg.gridSize, cfg.blockSize>>>(d.elems, g.elems, (Scalar)-1, n);
-            }
-            cudaCheck(cudaGetLastError(), "setVectorScalar_kernel d=-g");
+        // 1) Compute search direction d
+        if (restart || mem == 0) {
+            restart = false;
+            setVectorScalar<T><<<cfg.gridSize, cfg.blockSize>>>(d.elems, g.elems, (T)-1, n);
+            CUDA_CHECK(cudaGetLastError());
         } else {
             // q = g
-            cudaCheck(cudaMemcpy(q.elems, g.elems, (size_t)n * sizeof(Scalar), cudaMemcpyDeviceToDevice), "cudaMemcpy g->q");
+            CUDA_CHECK(cudaMemcpy(q.elems, g.elems, n * sizeof(T), cudaMemcpyDeviceToDevice));
 
-            int bound = (k > m) ? m : k;
+            int bound = (mem < m) ? mem : m;
 
+            // First loop (backwards)
             for (int i = bound - 1; i >= 0; --i) {
                 int idx = (k - 1 - i) % m;
-                Acc s_dot_q = dot(S.elems + (size_t)idx * n, q.elems, n, &dw);
-                alpha_hist[idx] = rho[idx] * s_dot_q;
+                if (idx < 0) idx += m;
 
-                // q = q - alpha[idx]*Y[idx]
-                Scalar a;
-                if constexpr (std::is_same<Scalar, __half>::value) a = __float2half(-(float)alpha_hist[idx]);
-                else a = (Scalar)(-alpha_hist[idx]);
-                axpy_kernel<<<cfg.gridSize, cfg.blockSize>>>(a, Y.elems + (size_t)idx * n, q.elems, n);
-                cudaCheck(cudaGetLastError(), "axpy_kernel q update");
+                // if rho[idx]==0, pair is inactive; skip
+                if (rho[idx] == (T)0) { alpha_hist[idx] = (T)0; continue; }
+
+                double s_dot_q = dot_f32(S.elems + idx * n, q.elems, n, cfg);
+                alpha_hist[idx] = (T)(rho[idx] * (T)s_dot_q);
+
+                axpy<T><<<cfg.gridSize, cfg.blockSize>>>((T)(-alpha_hist[idx]),
+                                                         Y.elems + idx * n,
+                                                         q.elems, n);
+                CUDA_CHECK(cudaGetLastError());
             }
 
+            // Scaling gamma using the most recent pair (k-1)
             int last_idx = (k - 1) % m;
-            Acc s_dot_y = dot(S.elems + (size_t)last_idx * n, Y.elems + (size_t)last_idx * n, n, &dw);
-            Acc y_dot_y = dot(Y.elems + (size_t)last_idx * n, Y.elems + (size_t)last_idx * n, n, &dw);
-            Acc gamma = (y_dot_y > (Acc)1e-18) ? (s_dot_y / y_dot_y) : (Acc)1;
+            if (last_idx < 0) last_idx += m;
 
-            // r = gamma * q
-            Scalar gsc;
-            if constexpr (std::is_same<Scalar, __half>::value) gsc = __float2half((float)gamma);
-            else gsc = (Scalar)gamma;
-            setVectorScalar_kernel<<<cfg.gridSize, cfg.blockSize>>>(r.elems, q.elems, gsc, n);
-            cudaCheck(cudaGetLastError(), "setVectorScalar_kernel r=gamma*q");
+            double gamma = 1.0;
+            if (rho[last_idx] != (T)0) {
+                double s_dot_y = dot_f32(S.elems + last_idx * n, Y.elems + last_idx * n, n, cfg);
+                double y_dot_y = dot_f32(Y.elems + last_idx * n, Y.elems + last_idx * n, n, cfg);
+                gamma = (y_dot_y > 1e-18) ? (s_dot_y / y_dot_y) : 1.0;
+            }
 
+            setVectorScalar<T><<<cfg.gridSize, cfg.blockSize>>>(r.elems, q.elems, (T)gamma, n);
+            CUDA_CHECK(cudaGetLastError());
+
+            // Second loop (forwards)
             for (int i = 0; i < bound; ++i) {
                 int idx = (k - bound + i) % m;
-                Acc y_dot_r = dot(Y.elems + (size_t)idx * n, r.elems, n, &dw);
-                Acc beta = rho[idx] * y_dot_r;
-                Acc coeff = alpha_hist[idx] - beta;
+                if (idx < 0) idx += m;
 
-                Scalar c;
-                if constexpr (std::is_same<Scalar, __half>::value) c = __float2half((float)coeff);
-                else c = (Scalar)coeff;
+                if (rho[idx] == (T)0) continue;
 
-                axpy_kernel<<<cfg.gridSize, cfg.blockSize>>>(c, S.elems + (size_t)idx * n, r.elems, n);
-                cudaCheck(cudaGetLastError(), "axpy_kernel r update");
+                double y_dot_r = dot_f32(Y.elems + idx * n, r.elems, n, cfg);
+                double beta = (double)rho[idx] * y_dot_r;
+
+                axpy<T><<<cfg.gridSize, cfg.blockSize>>>((T)(alpha_hist[idx] - (T)beta),
+                                                         S.elems + idx * n,
+                                                         r.elems, n);
+                CUDA_CHECK(cudaGetLastError());
             }
 
-            // d = -r
-            if constexpr (std::is_same<Scalar, __half>::value) {
-                setVectorScalar_kernel<<<cfg.gridSize, cfg.blockSize>>>(d.elems, r.elems, __float2half(-1.0f), n);
-            } else {
-                setVectorScalar_kernel<<<cfg.gridSize, cfg.blockSize>>>(d.elems, r.elems, (Scalar)-1, n);
-            }
-            cudaCheck(cudaGetLastError(), "setVectorScalar_kernel d=-r");
+            setVectorScalar<T><<<cfg.gridSize, cfg.blockSize>>>(d.elems, r.elems, (T)-1, n);
+            CUDA_CHECK(cudaGetLastError());
         }
 
-        // 2) Backtracking line search (GPU evaluation)
-        Acc g_dot_d = dot(g.elems, d.elems, n, &dw);
+        // 2) Backtracking line search (GPU f(x))
+        double g_dot_d = dot_f32(g.elems, d.elems, n, cfg);
 
-        // if not descent, fallback to steepest descent
-        if (g_dot_d >= (Acc)0) {
-            if constexpr (std::is_same<Scalar, __half>::value) {
-                setVectorScalar_kernel<<<cfg.gridSize, cfg.blockSize>>>(d.elems, g.elems, __float2half(-1.0f), n);
-            } else {
-                setVectorScalar_kernel<<<cfg.gridSize, cfg.blockSize>>>(d.elems, g.elems, (Scalar)-1, n);
-            }
-            cudaCheck(cudaGetLastError(), "reset d=-g");
-            g_dot_d = dot(g.elems, d.elems, n, &dw);
+        // If not a descent direction, restart to steepest descent
+        if (g_dot_d >= 0.0) {
+            restart = true;
+            mem = 0;
+            for (int i = 0; i < m; ++i) rho[i] = (T)0;
+            setVectorScalar<T><<<cfg.gridSize, cfg.blockSize>>>(d.elems, g.elems, (T)-1, n);
+            CUDA_CHECK(cudaGetLastError());
+            g_dot_d = dot_f32(g.elems, d.elems, n, cfg);
         }
 
-        Acc step = (Acc)1;
-        const Acc c1 = (Acc)1e-4;
-        const Acc decay = (Acc)0.5;
+        const double c1 = 1e-4;
+        const double decay = 0.5;
+        double step = 1.0;
         bool success = false;
 
-        cudaCheck(cudaMemcpy(x_old.elems, x.elems, (size_t)n * sizeof(Scalar), cudaMemcpyDeviceToDevice), "x->x_old");
-        cudaCheck(cudaMemcpy(g_old.elems, g.elems, (size_t)n * sizeof(Scalar), cudaMemcpyDeviceToDevice), "g->g_old");
+        // Save old state
+        CUDA_CHECK(cudaMemcpy(x_old.elems, x.elems, n * sizeof(T), cudaMemcpyDeviceToDevice));
+        CUDA_CHECK(cudaMemcpy(g_old.elems, g.elems, n * sizeof(T), cudaMemcpyDeviceToDevice));
 
         for (int ls_iter = 0; ls_iter < 25; ls_iter++) {
-            // x = x_old + step*d
-            cudaCheck(cudaMemcpy(x.elems, x_old.elems, (size_t)n * sizeof(Scalar), cudaMemcpyDeviceToDevice), "x_old->x");
-            Scalar st;
-            if constexpr (std::is_same<Scalar, __half>::value) st = __float2half((float)step);
-            else st = (Scalar)step;
+            // x = x_old + step * d
+            CUDA_CHECK(cudaMemcpy(x.elems, x_old.elems, n * sizeof(T), cudaMemcpyDeviceToDevice));
+            axpy<T><<<cfg.gridSize, cfg.blockSize>>>((T)step, d.elems, x.elems, n);
+            CUDA_CHECK(cudaGetLastError());
 
-            axpy_kernel<<<cfg.gridSize, cfg.blockSize>>>(st, d.elems, x.elems, n);
-            cudaCheck(cudaGetLastError(), "axpy_kernel line search x");
-
-            // Evaluate f(x) on GPU
-            Acc f_new = func.f(x.elems, n);
+            double f_new = func.f(x.elems, n);
+            CUDA_CHECK(cudaDeviceSynchronize());
 
             if (f_new <= val + c1 * step * g_dot_d) {
                 val = f_new;
@@ -634,116 +594,77 @@ lbfgs(int n, int m, Scalar* x0, int max_itr, Func func, typename NumericTraits<S
         }
 
         if (!success) {
-            std::cout << "Line Search Failed! Resetting L-BFGS history..." << std::endl;
-            k = -1;
+            // Hard restart + fallback small step to avoid spinning/crash
+            std::cout << "Line Search Failed -> restart + fallback step\n";
+            restart = true;
+            mem = 0;
+            for (int i = 0; i < m; ++i) rho[i] = (T)0;
+
+            // fallback: try tiny steepest descent steps until decrease
+            setVectorScalar<T><<<cfg.gridSize, cfg.blockSize>>>(d.elems, g.elems, (T)-1, n);
+            CUDA_CHECK(cudaGetLastError());
+
+            double step_fb = 1e-6;
+            bool ok = false;
+
+            for (int t = 0; t < 40; ++t) {
+                CUDA_CHECK(cudaMemcpy(x.elems, x_old.elems, n * sizeof(T), cudaMemcpyDeviceToDevice));
+                axpy<T><<<cfg.gridSize, cfg.blockSize>>>((T)step_fb, d.elems, x.elems, n);
+                CUDA_CHECK(cudaGetLastError());
+
+                double f_try = func.f(x.elems, n);
+                CUDA_CHECK(cudaDeviceSynchronize());
+
+                if (f_try < val) {
+                    val = f_try;
+                    ok = true;
+                    break;
+                }
+                step_fb *= 0.1;
+                if (step_fb < 1e-20) break;
+            }
+
+            if (!ok) {
+                std::cout << "Fallback also failed. Terminating.\n";
+                break;
+            }
+
+            // update gradient after accepted fallback step
+            func.df(x.elems, g.elems, n);
+            CUDA_CHECK(cudaDeviceSynchronize());
             continue;
         }
 
         // 3) Update gradient
         func.df(x.elems, g.elems, n);
+        CUDA_CHECK(cudaDeviceSynchronize());
 
+        // 4) Update history S/Y
         int cur = k % m;
 
         // S_cur = x - x_old
-        cudaCheck(cudaMemcpy(S.elems + (size_t)cur * n, x.elems, (size_t)n * sizeof(Scalar), cudaMemcpyDeviceToDevice),
-                  "copy x to S");
-        Scalar minus_one;
-        if constexpr (std::is_same<Scalar, __half>::value) minus_one = __float2half(-1.0f);
-        else minus_one = (Scalar)-1;
-
-        axpy_kernel<<<cfg.gridSize, cfg.blockSize>>>(minus_one, x_old.elems, S.elems + (size_t)cur * n, n);
-        cudaCheck(cudaGetLastError(), "S = x - x_old");
+        CUDA_CHECK(cudaMemcpy(S.elems + cur * n, x.elems, n * sizeof(T), cudaMemcpyDeviceToDevice));
+        axpy<T><<<cfg.gridSize, cfg.blockSize>>>((T)-1, x_old.elems, S.elems + cur * n, n);
+        CUDA_CHECK(cudaGetLastError());
 
         // Y_cur = g - g_old
-        cudaCheck(cudaMemcpy(Y.elems + (size_t)cur * n, g.elems, (size_t)n * sizeof(Scalar), cudaMemcpyDeviceToDevice),
-                  "copy g to Y");
-        axpy_kernel<<<cfg.gridSize, cfg.blockSize>>>(minus_one, g_old.elems, Y.elems + (size_t)cur * n, n);
-        cudaCheck(cudaGetLastError(), "Y = g - g_old");
+        CUDA_CHECK(cudaMemcpy(Y.elems + cur * n, g.elems, n * sizeof(T), cudaMemcpyDeviceToDevice));
+        axpy<T><<<cfg.gridSize, cfg.blockSize>>>((T)-1, g_old.elems, Y.elems + cur * n, n);
+        CUDA_CHECK(cudaGetLastError());
 
-        Acc sy = dot(S.elems + (size_t)cur * n, Y.elems + (size_t)cur * n, n, &dw);
+        double sy = dot_f32(S.elems + cur * n, Y.elems + cur * n, n, cfg);
 
-        if (sy > (Acc)1e-12) {
-            rho[cur] = (Acc)1 / sy;
+        if (sy > 1e-12) {
+            rho[cur] = (T)(1.0 / sy);
+            if (mem < m) mem++;
         } else {
-            // Skip update if curvature condition fails
-            k--;
+            // Mark this slot inactive; do NOT k-- (that causes weird behavior)
+            rho[cur] = (T)0;
+            // keep mem as-is (still valid older pairs)
         }
     }
-
-    cudaCheck(cudaMemcpy(x0, x.elems, (size_t)n * sizeof(Scalar), cudaMemcpyDeviceToHost), "x->x0 host");
+    CUDA_CHECK(cudaMemcpy(x0, x.elems, n * sizeof(T), cudaMemcpyDeviceToHost));
     delete[] rho;
     delete[] alpha_hist;
     return val;
-}
-
-// =========================
-//  Main
-// =========================
-int main(int argc, char* argv[]) {
-    (void)argc; (void)argv;
-
-    // ===== Select precision here =====
-    // using Scalar = double;
-    // using Scalar = float;
-    using Scalar = __half;   // FP16 storage + FP32 accumulation (recommended)
-
-    using Acc = typename NumericTraits<Scalar>::Accum;
-
-    int N = 1 << 16;  // Problem size
-    int M = 10;       // History size
-
-    // Host x0 (Scalar)
-    Scalar* x0 = (Scalar*)malloc((size_t)N * sizeof(Scalar));
-    if (!x0) throw std::bad_alloc();
-
-    // --- TEST 1: QUADRATIC ---
-    for (int i = 0; i < N; i++) {
-        if constexpr (std::is_same<Scalar, __half>::value) x0[i] = __float2half(5.0f);
-        else x0[i] = (Scalar)5.0;
-    }
-
-    auto start = std::chrono::high_resolution_clock::now();
-    QuadraticTest<Scalar> quad(N);
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double, std::milli> duration = end - start;
-
-    printf("Starting Quadratic...\n");
-    Acc final_f = lbfgs<Scalar>(N, M, x0, 1000, quad, (Acc)1e-4);
-    printf("Quadratic Final F: %e (Target: 0)\n", (double)final_f);
-    std::cout << "Time elapsed (ctor only): " << duration.count() << " ms\n";
-
-    // --- TEST 2: ROSENBROCK ---
-    for (int i = 0; i < N; i++) {
-        if constexpr (std::is_same<Scalar, __half>::value) x0[i] = __float2half(-1.2f);
-        else x0[i] = (Scalar)-1.2;
-    }
-
-    start = std::chrono::high_resolution_clock::now();
-    RosenbrockTest<Scalar> rosen(N);
-    end = std::chrono::high_resolution_clock::now();
-
-    printf("Starting Rosenbrock...\n");
-    final_f = lbfgs<Scalar>(N, M, x0, 5000, rosen, (Acc)1e-4);
-    duration = end - start;
-    printf("Rosenbrock Final F: %e (Target: 0)\n", (double)final_f);
-    std::cout << "Time elapsed (ctor only): " << duration.count() << " ms\n";
-
-    // --- TEST 3: RASTRIGIN ---
-    for (int i = 0; i < N; i++) {
-        if constexpr (std::is_same<Scalar, __half>::value) x0[i] = __float2half(-1.2f);
-        else x0[i] = (Scalar)-1.2;
-    }
-
-    start = std::chrono::high_resolution_clock::now();
-    RastriginTest<Scalar> rastrigin(N);
-    end = std::chrono::high_resolution_clock::now();
-
-    printf("Starting Rastrigin...\n");
-    final_f = lbfgs<Scalar>(N, M, x0, 5000, rastrigin, (Acc)1e-4);
-    duration = end - start;
-    printf("Rastrigin Final F: %e (Target: 0)\n", (double)final_f);
-    std::cout << "Time elapsed (ctor only): " << duration.count() << " ms\n";
-
-    free(x0);
-    return 0;
 }
