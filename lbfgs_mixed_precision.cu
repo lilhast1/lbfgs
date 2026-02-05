@@ -79,7 +79,7 @@ struct KernelConfig {
     }
 };
 
-/*----------------------------------------KERNELI---------------------------------------------------*/
+/*----------------------------------------KERNELI (Prototipi)----------------------------------------*/
 
 // CUDA kernel. Each thread takes care of one element of c, each thread block preforms reduction
 
@@ -104,6 +104,7 @@ __global__ void dot_partial_f32_to_f64(const float* a, const float* b, double* p
 
 /*----------------------------------------Testovi---------------------------------------------------*/
 
+// Kernel za računanje f(x) = x^2 i g(x) = 2x
 template <typename T>
 __global__ void quad_kernel(const T* x, T* f_vals, T* g, int n) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -114,6 +115,7 @@ __global__ void quad_kernel(const T* x, T* f_vals, T* g, int n) {
     }
 }
 
+// Test: kvadratna funkcija - wrapper oko kernela iznad
 template <typename T>
 struct QuadraticTest {
     T* d_temp_f;
@@ -137,6 +139,7 @@ struct QuadraticTest {
     }
 };
 
+// Kernel za računanje Rosenbrockove funkcije i njenog gradijenta
 template <typename T>
 __global__ void rosen_kernel(const T* x, T* f_vals, T* g, int n) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -197,6 +200,7 @@ __global__ void rosen_fg_kernel_noatom(const T* x, T* f_vals, T* g, int n) {
     }
 }
 
+// Wrapper za Rosenbrock test
 template <typename T>
 struct RosenbrockTest {
     T* d_temp_f;
@@ -214,6 +218,7 @@ struct RosenbrockTest {
     }
 };
 
+// Wrapper za not-atomic Rosenbrock test
 template <typename T>
 struct RosenbrockNoAtomTest {
     T* d_temp_f;
@@ -234,6 +239,7 @@ struct RosenbrockNoAtomTest {
 
 };
 
+// Kernel za računanje Rastriginove funkcije i njenog gradijenta
 template <typename T>
 __global__ void rastrigin_kernel(const T* x, T* f_vals, T* g, int n) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -246,6 +252,7 @@ __global__ void rastrigin_kernel(const T* x, T* f_vals, T* g, int n) {
     }
 }
 
+// Wrapper za Rastrigin test
 template <typename T>
 struct RastriginTest {
     T* d_temp_f;
@@ -262,6 +269,7 @@ struct RastriginTest {
     }
 };
 
+// Kernel za računanje Ackleyjeve funkcije i njenog gradijenta
 template <typename T>
 __global__ void ackley_kernel(const T* x, T* f_vals, T* g, int n) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -274,6 +282,7 @@ __global__ void ackley_kernel(const T* x, T* f_vals, T* g, int n) {
     }
 }
 
+// Wrapper za Ackley test
 template <typename T>
 struct AckleyTest {
     T* d_temp_f;
@@ -290,12 +299,11 @@ struct AckleyTest {
     }
 };
 
-/*----------------------------------------Wrapperfje---------------------------------------------------*/
+/*----------------------------------------Wrapper fje---------------------------------------------------*/
 
 // neka su vektori a i b na gpu alocirani vraca a . b
 template <typename T>
 double dot(const T* a, const T* b, int n, DotLookupTable<T>* context = nullptr);
-
 template <typename Func, typename T>
 double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps = 1e-9);
 
@@ -315,10 +323,10 @@ int main(int argc, char* argv[]) {
     float elapsedTime;
 
     // --- TEST 1: QUADRATIC ---
-    for (int i = 0; i < N; i++) x0[i] = 10.0;  // Start far away
+    for (int i = 0; i < N; i++) x0[i] = 8.0;  // Start far away
     QuadraticTest<T> quad(N);
     
-    printf("Starting Quadratic...\n");
+    printf("Starting: Quadratic...\n");
     
     cudaEventRecord(startEvent);
     double final_f = lbfgs(N, M, x0, 1000, quad, 1e-6);
@@ -329,11 +337,11 @@ int main(int argc, char* argv[]) {
     printf("Quadratic Final F: %e (Target: 0)\n", final_f);
     std::cout << "Time elapsed: " << elapsedTime << " ms\n";
 
-    // --- TEST 2: ROSENBROCK ---
+    // --- TEST 2: ROSENBROCK [-5, 10]^N ---
     for (int i = 0; i < N; i++) x0[i] = -4.2;  // Standard starting point
     RosenbrockTest<T> rosen(N);
 
-    printf("Starting Rosenbrock...\n");
+    printf("Starting: Rosenbrock...\n");
 
     cudaEventRecord(startEvent);
     final_f = lbfgs(N, M, x0, 5000, rosen, 1e-6);
@@ -344,8 +352,9 @@ int main(int argc, char* argv[]) {
     printf("Rosenbrock Final F: %e (Target: 0)\n", final_f);
     std::cout << "Time elapsed: " << elapsedTime << " ms\n";
 
-/*    
-    // TEST 3: ROSENBROCK NO ATOM
+/*  Sporo, jako sporo.
+
+    // --- TEST 3: ROSENBROCK NO ATOM ---
     for (int i = 0; i < N; i++) x0[i] = -4.2;  // Standard starting point
     RosenbrockNoAtomTest<T> rosen_noatom(N);
     
@@ -363,11 +372,11 @@ int main(int argc, char* argv[]) {
 
 
 
-    // --- TEST 4: Rastrigin ---
+    // --- TEST 4: Rastrigin [-5.12, 5.12]^N ---
     for (int i = 0; i < N; i++) x0[i] = -1.2;  // Standard starting point
     RastriginTest<T> rastrigin(N);
 
-    printf("Starting Rastrigin...\n");
+    printf("Starting: Rastrigin...\n");
 
     cudaEventRecord(startEvent);
     final_f = lbfgs(N, M, x0, 5000, rastrigin, 1e-6);
@@ -378,10 +387,10 @@ int main(int argc, char* argv[]) {
     printf("Rastrigin Final F: %e (Target: 0)\n", final_f);
     std::cout << "Time elapsed: " << elapsedTime << " ms\n";
 
-    // --- TEST 5: Ackley ---
+    // --- TEST 5: Ackley [-32.768, 32.768]^N ---
     for (int i = 0; i < N; i++) x0[i] = -4;
     AckleyTest<T> ackley(N);
-    printf("Starting Ackley...\n");
+    printf("Starting: Ackley...\n");
 
     cudaEventRecord(startEvent);
     final_f = lbfgs(N, M, x0, 5000, ackley, 1e-6);
@@ -399,11 +408,7 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-/*----------------------------------------IMPL---------------------------------------------------*/
-
-/*----------------------------------------Datatypes---------------------------------------------------*/
-
-/*----------------------------------------KERNELI---------------------------------------------------*/
+/*----------------------------------------KERNELI (Implementacije)-----------------------------------*/
 
 template <typename T>
 __global__ void mulVecScal(T alpha, const T* x, T* y, int n) {
@@ -428,6 +433,8 @@ __global__ void setVectorScalar(T* r, const T* q, T factor, int n) {
     }
 }
 
+// The way to go for dot product
+// svaki blok kopira parcijalnu sumu, na hostu se redukuje
 template <typename T>
 __global__ void dotProduct(const T* a, const T* b, T* c, int n) {
     // Get global thread ID
@@ -464,6 +471,12 @@ __global__ void dotProduct(const T* a, const T* b, T* c, int n) {
     }
 }
 
+// Trash kernel for dot product using atomicAdd 
+//
+// Svaki thread računa svoj dio i onda atomically 
+// dodaje u globalnu sumu (sporije, weirdly, mada 
+// na enterprise GPUs može biti brže zbog boljeg
+// hardwarea za atomics)
 __global__ void dot_atomic_f32(const float* a, const float* b, float* out, int n) {
     float sum = 0.0f;
     for (int i = blockIdx.x * blockDim.x + threadIdx.x; i < n; i += blockDim.x * gridDim.x)
@@ -481,6 +494,7 @@ __global__ void dot_atomic_f32(const float* a, const float* b, float* out, int n
     if (threadIdx.x == 0) atomicAdd(out, buf[0]);
 }
 
+// Redukcijski kernel za sumu
 template <typename T>
 __global__ void sum_reduction_kernel(const T* input, T* output, int n) {
     __shared__ T sdata[BLOCK_SIZE];
@@ -500,6 +514,14 @@ __global__ void sum_reduction_kernel(const T* input, T* output, int n) {
         atomicAdd(output, sdata[0]);
 }
 
+// Dot product kernel za float vektore s akumulacijom u double
+//
+// Svaki thread računa svoj dio i onda block-wise redukuje
+// u double preciznosti. Parcijalne sume se vraćaju na host
+// gdje se finalno redukuje u double preciznosti.
+//
+// Numerički najstabilniji način za float vektore, ali DALEKO
+// najsporiji.
 __global__ void dot_partial_f32_to_f64(const float* a, const float* b, double* partial, int n) {
     __shared__ double buf[256];
     double sum = 0.0;
@@ -518,8 +540,7 @@ __global__ void dot_partial_f32_to_f64(const float* a, const float* b, double* p
 
 /*----------------------------------------Wrapperfje---------------------------------------------------*/
 
-// Helper to get sum of a device array
-    
+// Helper to get sum of a device array 
 template <typename T>
 double gpu_sum(T* d_elements, int n) {
     static T* d_res = nullptr;
@@ -535,6 +556,7 @@ double gpu_sum(T* d_elements, int n) {
     return (double)h_res;
 }
 
+// The way to go for dot product
 template <typename T>
 double dot(const T* a, const T* b, int n, DotLookupTable<T>* context) {
     dim3 blockSize = BLOCK_SIZE;
@@ -575,7 +597,8 @@ double dot(const T* a, const T* b, int n, DotLookupTable<T>* context) {
     return result;
 }
 
-
+//  Trash code, trebao raditi brže ali ne isplati se zbog malo VRAM-a (malo N)
+//  i slabe podrške za atomic na slabijim karticama
 inline float dot_f32(const float* a, const float* b, int n, KernelConfig cfg) {
     static float* d_out = nullptr;
     if (!d_out) cudaMalloc(&d_out, sizeof(float));
@@ -586,6 +609,8 @@ inline float dot_f32(const float* a, const float* b, int n, KernelConfig cfg) {
     return h;
 }
 
+
+// Numerički najstabilniji ali i najsporiji način za float vektore
 double dot_f32_accum_f64(const float* a, const float* b, int n, const KernelConfig& cfg) {
     static double* d_partial = nullptr;
     static double* h_partial = nullptr;
@@ -610,7 +635,8 @@ double dot_f32_accum_f64(const float* a, const float* b, int n, const KernelConf
     return s;
 }
 
-
+// Macro za provjeru CUDA errora, 
+// koristi se kao: CUDA_CHECK( cudaMalloc( ... ) );
 #ifndef CUDA_CHECK
 #define CUDA_CHECK(call) do {                                  \
   cudaError_t _e = (call);                                     \
@@ -622,6 +648,7 @@ double dot_f32_accum_f64(const float* a, const float* b, int n, const KernelConf
 } while(0)
 #endif
 
+// L-BFGS algoritam, in all its flashy glory :D
 template <typename Func, typename T>
 double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps) {
     UnifiedVector<T> x(n), g(n);
@@ -640,8 +667,6 @@ double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps) {
     DotLookupTable<T> dw(n);
     KernelConfig cfg(n);
 
-
-
     CUDA_CHECK(cudaMemcpy(x.elems, x0, n * sizeof(T), cudaMemcpyHostToDevice));
 
     double val = func.f(x.elems, n);
@@ -653,7 +678,7 @@ double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps) {
 
     for (int k = 0; k < max_itr; k++) {
         // gradient norm
-        double g_norm = std::sqrt(dot_f32(g.elems, g.elems, n, cfg));
+        double g_norm = std::sqrt(dot(g.elems, g.elems, n, &dw));
         if (g_norm < eps) break;
 
         // 1) Compute search direction d
@@ -675,7 +700,7 @@ double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps) {
                 // if rho[idx]==0, pair is inactive; skip
                 if (rho[idx] == (T)0) { alpha_hist[idx] = (T)0; continue; }
 
-                double s_dot_q = dot_f32(S.elems + idx * n, q.elems, n, cfg);
+                double s_dot_q = dot(S.elems + idx * n, q.elems, n, &dw);
                 alpha_hist[idx] = (T)(rho[idx] * (T)s_dot_q);
 
                 axpy<T><<<cfg.gridSize, cfg.blockSize>>>((T)(-alpha_hist[idx]),
@@ -690,8 +715,8 @@ double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps) {
 
             double gamma = 1.0;
             if (rho[last_idx] != (T)0) {
-                double s_dot_y = dot_f32(S.elems + last_idx * n, Y.elems + last_idx * n, n, cfg);
-                double y_dot_y = dot_f32(Y.elems + last_idx * n, Y.elems + last_idx * n, n, cfg);
+                double s_dot_y = dot(S.elems + last_idx * n, Y.elems + last_idx * n, n, &dw);
+                double y_dot_y = dot(Y.elems + last_idx * n, Y.elems + last_idx * n, n, &dw);
                 gamma = (y_dot_y > 1e-18) ? (s_dot_y / y_dot_y) : 1.0;
             }
 
@@ -705,7 +730,7 @@ double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps) {
 
                 if (rho[idx] == (T)0) continue;
 
-                double y_dot_r = dot_f32(Y.elems + idx * n, r.elems, n, cfg);
+                double y_dot_r = dot(Y.elems + idx * n, r.elems, n, &dw);
                 double beta = (double)rho[idx] * y_dot_r;
 
                 axpy<T><<<cfg.gridSize, cfg.blockSize>>>((T)(alpha_hist[idx] - (T)beta),
@@ -719,7 +744,7 @@ double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps) {
         }
 
         // 2) Backtracking line search (GPU f(x))
-        double g_dot_d = dot_f32(g.elems, d.elems, n, cfg);
+        double g_dot_d = dot(g.elems, d.elems, n, &dw);
 
         // If not a descent direction, restart to steepest descent
         if (g_dot_d >= 0.0) {
@@ -728,7 +753,7 @@ double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps) {
             for (int i = 0; i < m; ++i) rho[i] = (T)0;
             setVectorScalar<T><<<cfg.gridSize, cfg.blockSize>>>(d.elems, g.elems, (T)-1, n);
             CUDA_CHECK(cudaGetLastError());
-            g_dot_d = dot_f32(g.elems, d.elems, n, cfg);
+            g_dot_d = dot(g.elems, d.elems, n, &dw);
         }
 
         const double c1 = 1e-4;
@@ -761,17 +786,16 @@ double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps) {
             if (fabs(f_new - f_old) < 1e-12) {
                 // Function value not changing much; likely stuck. Break to fallback.
                 //
-                // Ako se stavi true, nastavlja u broju iteracija presitnim koracima
-                // sve do globalnog optimuma (ako je dostupan)
+                // Ako se stavi TRUE, nastavlja u broju iteracija jako sitnim koracima
+                // sve do globalnog optimuma (ako je dostupan).
                 //
-                // Ako se stavi false, ide na fallback odmah i time se izbjegava gubljenje vremena,
-                // povećavajući korak da se izađe iz ravnih područja.
+                // Ako se stavi FALSE, ide na fallback odmah i time se izbjegava gubljenje 
+                // vremena, povećavajući korak da se izađe iz ravnih područja.
+
                 success = false;
                 break;
             }
             else f_old = f_new;
-
-
         }
 
         if (!success) {
@@ -833,7 +857,7 @@ double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps) {
         axpy<T><<<cfg.gridSize, cfg.blockSize>>>((T)-1, g_old.elems, Y.elems + cur * n, n);
         CUDA_CHECK(cudaGetLastError());
 
-        double sy = dot_f32(S.elems + cur * n, Y.elems + cur * n, n, cfg);
+        double sy = dot(S.elems + cur * n, Y.elems + cur * n, n, &dw);
 
         if (sy > 1e-12) {
             rho[cur] = (T)(1.0 / sy);

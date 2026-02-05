@@ -1,0 +1,662 @@
+[
+  [
+    ".\\lbfgs_fp.exe",
+    541.7714000031992,
+    [
+      {
+        "name": "Quadratic",
+        "time": 90.3204
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 225.267
+      },
+      {
+        "name": "Rastrigin",
+        "time": 19.8881
+      },
+      {
+        "name": "Ackley",
+        "time": 34.6587
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_fp.exe",
+    450.43030000306317,
+    [
+      {
+        "name": "Quadratic",
+        "time": 91.565
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 162.492
+      },
+      {
+        "name": "Rastrigin",
+        "time": 18.397
+      },
+      {
+        "name": "Ackley",
+        "time": 25.7329
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_fp.exe",
+    498.84039999960805,
+    [
+      {
+        "name": "Quadratic",
+        "time": 105.137
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 203.043
+      },
+      {
+        "name": "Rastrigin",
+        "time": 20.7282
+      },
+      {
+        "name": "Ackley",
+        "time": 26.3854
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_fp.exe",
+    456.83849999841186,
+    [
+      {
+        "name": "Quadratic",
+        "time": 94.7227
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 166.681
+      },
+      {
+        "name": "Rastrigin",
+        "time": 19.706
+      },
+      {
+        "name": "Ackley",
+        "time": 28.0924
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_fp.exe",
+    527.6196999984677,
+    [
+      {
+        "name": "Quadratic",
+        "time": 98.1504
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 236.996
+      },
+      {
+        "name": "Rastrigin",
+        "time": 21.6506
+      },
+      {
+        "name": "Ackley",
+        "time": 24.9595
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_fp.exe",
+    473.44470000098227,
+    [
+      {
+        "name": "Quadratic",
+        "time": 95.0019
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 180.624
+      },
+      {
+        "name": "Rastrigin",
+        "time": 20.071
+      },
+      {
+        "name": "Ackley",
+        "time": 28.2802
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_fp.exe",
+    474.0483999994467,
+    [
+      {
+        "name": "Quadratic",
+        "time": 96.026
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 173.528
+      },
+      {
+        "name": "Rastrigin",
+        "time": 21.5796
+      },
+      {
+        "name": "Ackley",
+        "time": 27.6746
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_fp.exe",
+    495.0186999994912,
+    [
+      {
+        "name": "Quadratic",
+        "time": 112.142
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 194.701
+      },
+      {
+        "name": "Rastrigin",
+        "time": 22.1609
+      },
+      {
+        "name": "Ackley",
+        "time": 24.5994
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_fp.exe",
+    459.9668000009842,
+    [
+      {
+        "name": "Quadratic",
+        "time": 90.9397
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 165.666
+      },
+      {
+        "name": "Rastrigin",
+        "time": 20.8229
+      },
+      {
+        "name": "Ackley",
+        "time": 35.6792
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_fp.exe",
+    487.830699999904,
+    [
+      {
+        "name": "Quadratic",
+        "time": 100.55
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 183.645
+      },
+      {
+        "name": "Rastrigin",
+        "time": 20.1133
+      },
+      {
+        "name": "Ackley",
+        "time": 33.0019
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_fp.exe",
+    497.8558000002522,
+    [
+      {
+        "name": "Quadratic",
+        "time": 101.642
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 193.066
+      },
+      {
+        "name": "Rastrigin",
+        "time": 19.5947
+      },
+      {
+        "name": "Ackley",
+        "time": 34.8227
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_fp.exe",
+    468.66919999956735,
+    [
+      {
+        "name": "Quadratic",
+        "time": 110.046
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 157.55
+      },
+      {
+        "name": "Rastrigin",
+        "time": 20.1689
+      },
+      {
+        "name": "Ackley",
+        "time": 30.4854
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_fp.exe",
+    519.0798000003269,
+    [
+      {
+        "name": "Quadratic",
+        "time": 115.679
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 201.814
+      },
+      {
+        "name": "Rastrigin",
+        "time": 18.96
+      },
+      {
+        "name": "Ackley",
+        "time": 34.764
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_fp.exe",
+    462.72339999995893,
+    [
+      {
+        "name": "Quadratic",
+        "time": 90.3258
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 177.399
+      },
+      {
+        "name": "Rastrigin",
+        "time": 21.437
+      },
+      {
+        "name": "Ackley",
+        "time": 27.3848
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_fp.exe",
+    453.9736000006087,
+    [
+      {
+        "name": "Quadratic",
+        "time": 84.8612
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 175.074
+      },
+      {
+        "name": "Rastrigin",
+        "time": 20.2147
+      },
+      {
+        "name": "Ackley",
+        "time": 27.1767
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_fp.exe",
+    493.2340999985172,
+    [
+      {
+        "name": "Quadratic",
+        "time": 100.012
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 199.852
+      },
+      {
+        "name": "Rastrigin",
+        "time": 19.4303
+      },
+      {
+        "name": "Ackley",
+        "time": 27.4968
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_fp.exe",
+    476.4891000013449,
+    [
+      {
+        "name": "Quadratic",
+        "time": 86.5396
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 187.7
+      },
+      {
+        "name": "Rastrigin",
+        "time": 22.624
+      },
+      {
+        "name": "Ackley",
+        "time": 32.0793
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_fp.exe",
+    479.01590000037686,
+    [
+      {
+        "name": "Quadratic",
+        "time": 91.1233
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 194.125
+      },
+      {
+        "name": "Rastrigin",
+        "time": 18.7427
+      },
+      {
+        "name": "Ackley",
+        "time": 26.7009
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_fp.exe",
+    453.6379000019224,
+    [
+      {
+        "name": "Quadratic",
+        "time": 93.8962
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 167.051
+      },
+      {
+        "name": "Rastrigin",
+        "time": 23.4512
+      },
+      {
+        "name": "Ackley",
+        "time": 22.5091
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_fp.exe",
+    477.6304999977583,
+    [
+      {
+        "name": "Quadratic",
+        "time": 111.339
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 175.064
+      },
+      {
+        "name": "Rastrigin",
+        "time": 20.3881
+      },
+      {
+        "name": "Ackley",
+        "time": 24.9077
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_fp.exe",
+    445.55229999969015,
+    [
+      {
+        "name": "Quadratic",
+        "time": 86.2307
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 161.588
+      },
+      {
+        "name": "Rastrigin",
+        "time": 19.6878
+      },
+      {
+        "name": "Ackley",
+        "time": 26.9901
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_fp.exe",
+    479.40319999906933,
+    [
+      {
+        "name": "Quadratic",
+        "time": 99.6567
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 187.243
+      },
+      {
+        "name": "Rastrigin",
+        "time": 18.8847
+      },
+      {
+        "name": "Ackley",
+        "time": 27.6859
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_fp.exe",
+    552.8975000015635,
+    [
+      {
+        "name": "Quadratic",
+        "time": 111.244
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 245.742
+      },
+      {
+        "name": "Rastrigin",
+        "time": 21.0076
+      },
+      {
+        "name": "Ackley",
+        "time": 27.9327
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_fp.exe",
+    460.2694999994128,
+    [
+      {
+        "name": "Quadratic",
+        "time": 85.4125
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 173.251
+      },
+      {
+        "name": "Rastrigin",
+        "time": 23.2161
+      },
+      {
+        "name": "Ackley",
+        "time": 28.3477
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_fp.exe",
+    498.0284000012034,
+    [
+      {
+        "name": "Quadratic",
+        "time": 113.083
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 192.005
+      },
+      {
+        "name": "Rastrigin",
+        "time": 23.2438
+      },
+      {
+        "name": "Ackley",
+        "time": 25.193
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_fp.exe",
+    502.58709999980056,
+    [
+      {
+        "name": "Quadratic",
+        "time": 93.2632
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 217.529
+      },
+      {
+        "name": "Rastrigin",
+        "time": 19.4057
+      },
+      {
+        "name": "Ackley",
+        "time": 28.1358
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_fp.exe",
+    463.0773999997473,
+    [
+      {
+        "name": "Quadratic",
+        "time": 98.8303
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 177.368
+      },
+      {
+        "name": "Rastrigin",
+        "time": 17.7117
+      },
+      {
+        "name": "Ackley",
+        "time": 26.2044
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_fp.exe",
+    475.652800003445,
+    [
+      {
+        "name": "Quadratic",
+        "time": 96.5682
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 191.981
+      },
+      {
+        "name": "Rastrigin",
+        "time": 17.6162
+      },
+      {
+        "name": "Ackley",
+        "time": 22.812
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_fp.exe",
+    447.22080000065034,
+    [
+      {
+        "name": "Quadratic",
+        "time": 84.9149
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 170.791
+      },
+      {
+        "name": "Rastrigin",
+        "time": 19.8307
+      },
+      {
+        "name": "Ackley",
+        "time": 25.6195
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_fp.exe",
+    458.94509999925504,
+    [
+      {
+        "name": "Quadratic",
+        "time": 98.3106
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 161.074
+      },
+      {
+        "name": "Rastrigin",
+        "time": 22.789
+      },
+      {
+        "name": "Ackley",
+        "time": 28.0901
+      }
+    ]
+  ]
+]
