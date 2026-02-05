@@ -98,6 +98,10 @@ __global__ void mulVecScal(T alpha, const T* x, T* y, int n);
 template <typename T>
 __global__ void sum_reduction_kernel(const T* input, T* output, int n);
 
+template <typename T>
+__global__ void dot_partial_f32_to_f64(const float* a, const float* b, double* partial, int n);
+
+
 /*----------------------------------------Testovi---------------------------------------------------*/
 
 template <typename T>
@@ -153,6 +157,46 @@ __global__ void rosen_kernel(const T* x, T* f_vals, T* g, int n) {
     }
 }
 
+// No-atom version (for testing)
+template <typename T>
+__global__ void rosen_fg_kernel_noatom(const T* x, T* f_vals, T* g, int n) {
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+
+    // f contribution uses i in [0..n-2]
+    if (f_vals && i < n - 1) {
+        T xi = x[i];
+        T xj = x[i + 1];
+        T t1 = xj - xi * xi;
+        T t2 = (T)1 - xi;
+        f_vals[i] = (T)100 * t1 * t1 + t2 * t2;
+    }
+
+    // gradient uses i in [0..n-1]
+    if (g && i < n) {
+        T gi = (T)0;
+
+        if (i == 0) {
+            T x0 = x[0], x1 = x[1];
+            T t1 = x1 - x0 * x0;
+            T t2 = (T)1 - x0;
+            gi = (T)(-400) * x0 * t1 - (T)2 * t2;
+        } else if (i == n - 1) {
+            T xm1 = x[n - 1], xm2 = x[n - 2];
+            gi = (T)200 * (xm1 - xm2 * xm2);
+        } else {
+            T xim1 = x[i - 1];
+            T xi   = x[i];
+            T xip1 = x[i + 1];
+            T t_left  = xi - xim1 * xim1;
+            T t_right = xip1 - xi * xi;
+            T t2 = (T)1 - xi;
+            gi = (T)200 * t_left + (T)(-400) * xi * t_right - (T)2 * t2;
+        }
+
+        g[i] = gi;
+    }
+}
+
 template <typename T>
 struct RosenbrockTest {
     T* d_temp_f;
@@ -168,6 +212,26 @@ struct RosenbrockTest {
         cudaMemset(d_g, 0, n * sizeof(T));
         rosen_kernel<<<(n + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE>>>(d_x, (T*)nullptr, d_g, n);
     }
+};
+
+template <typename T>
+struct RosenbrockNoAtomTest {
+    T* d_temp_f;
+    RosenbrockNoAtomTest(int n) { cudaMalloc(&d_temp_f, n * sizeof(T)); }
+    ~RosenbrockNoAtomTest() { cudaFree(d_temp_f); }
+
+    double f(T* d_x, int n) {
+        cudaMemset(d_temp_f, 0, n * sizeof(T));
+        int blocks = (n + BLOCK_SIZE - 1) / BLOCK_SIZE;
+        rosen_fg_kernel_noatom<<<blocks, BLOCK_SIZE>>>(d_x, d_temp_f, (T*)nullptr, n);
+        return gpu_sum(d_temp_f, n); // sum only [0..n-2] meaningful; fine if last is 0
+    }
+
+    void df(T* d_x, T* d_g, int n) {
+        int blocks = (n + BLOCK_SIZE - 1) / BLOCK_SIZE;
+        rosen_fg_kernel_noatom<<<blocks, BLOCK_SIZE>>>(d_x, (T*)nullptr, d_g, n);
+    }
+
 };
 
 template <typename T>
@@ -198,6 +262,34 @@ struct RastriginTest {
     }
 };
 
+template <typename T>
+__global__ void ackley_kernel(const T* x, T* f_vals, T* g, int n) {
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i < n) {
+        T xi = x[i];
+        if (f_vals)
+            f_vals[i] = -20.0 * exp(-0.2 * sqrt(xi * xi)) - exp(cos(2.0 * M_PI * xi)) + 20.0 + M_E;
+        if (g)
+            g[i] = 4.0 * xi * exp(-0.2 * sqrt(xi * xi)) / sqrt(xi * xi) + 2.0 * M_PI * sin(2.0 * M_PI * xi) * exp(cos(2.0 * M_PI * xi));
+    }
+}
+
+template <typename T>
+struct AckleyTest {
+    T* d_temp_f;
+    AckleyTest(int n) { cudaMalloc(&d_temp_f, n * sizeof(T)); }
+    ~AckleyTest() { cudaFree(d_temp_f); }
+
+    double f(T* d_x, int n) {
+        ackley_kernel<<<(n + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE>>>(d_x, d_temp_f, (T*)nullptr,
+                                                                                n);
+        return gpu_sum(d_temp_f, n);
+    }
+    void df(T* d_x, T* d_g, int n) {
+        ackley_kernel<<<(n + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE>>>(d_x, (T*)nullptr, d_g, n);
+    }
+};
+
 /*----------------------------------------Wrapperfje---------------------------------------------------*/
 
 // neka su vektori a i b na gpu alocirani vraca a . b
@@ -212,7 +304,7 @@ int main(int argc, char* argv[]) {
     //using T = double;
     using T = float;
     
-    int N = 1 << 16;  // Problem size
+    int N = 1 << 12;  // Problem size
     int M = 10;       // History size
     T* x0 = new T[N];
 
@@ -223,7 +315,7 @@ int main(int argc, char* argv[]) {
     float elapsedTime;
 
     // --- TEST 1: QUADRATIC ---
-    for (int i = 0; i < N; i++) x0[i] = 5.0;  // Start far away
+    for (int i = 0; i < N; i++) x0[i] = 10.0;  // Start far away
     QuadraticTest<T> quad(N);
     
     printf("Starting Quadratic...\n");
@@ -238,7 +330,7 @@ int main(int argc, char* argv[]) {
     std::cout << "Time elapsed: " << elapsedTime << " ms\n";
 
     // --- TEST 2: ROSENBROCK ---
-    for (int i = 0; i < N; i++) x0[i] = -1.2;  // Standard starting point
+    for (int i = 0; i < N; i++) x0[i] = -4.2;  // Standard starting point
     RosenbrockTest<T> rosen(N);
 
     printf("Starting Rosenbrock...\n");
@@ -252,7 +344,26 @@ int main(int argc, char* argv[]) {
     printf("Rosenbrock Final F: %e (Target: 0)\n", final_f);
     std::cout << "Time elapsed: " << elapsedTime << " ms\n";
 
-    // --- TEST 2: Rastrigin ---
+/*    
+    // TEST 3: ROSENBROCK NO ATOM
+    for (int i = 0; i < N; i++) x0[i] = -4.2;  // Standard starting point
+    RosenbrockNoAtomTest<T> rosen_noatom(N);
+    
+    printf("Starting Rosenbrock No Atom...\n");
+
+    cudaEventRecord(startEvent);
+    final_f = lbfgs(N, M, x0, 5000, rosen_noatom, 1e-6);
+    cudaEventRecord(stopEvent);
+
+    cudaEventSynchronize(stopEvent);
+    cudaEventElapsedTime(&elapsedTime, startEvent, stopEvent);
+    printf("Rosenbrock No Atom Final F: %e (Target: 0)\n", final_f);
+    std::cout << "Time elapsed: " << elapsedTime << " ms\n";
+*/
+
+
+
+    // --- TEST 4: Rastrigin ---
     for (int i = 0; i < N; i++) x0[i] = -1.2;  // Standard starting point
     RastriginTest<T> rastrigin(N);
 
@@ -267,10 +378,23 @@ int main(int argc, char* argv[]) {
     printf("Rastrigin Final F: %e (Target: 0)\n", final_f);
     std::cout << "Time elapsed: " << elapsedTime << " ms\n";
 
-    delete[] x0;
+    // --- TEST 5: Ackley ---
+    for (int i = 0; i < N; i++) x0[i] = -4;
+    AckleyTest<T> ackley(N);
+    printf("Starting Ackley...\n");
 
-    cudaEventDestroy(startEvent);
-    cudaEventDestroy(stopEvent);
+    cudaEventRecord(startEvent);
+    final_f = lbfgs(N, M, x0, 5000, ackley, 1e-6);
+    cudaEventRecord(stopEvent);
+
+    cudaEventSynchronize(stopEvent);
+    cudaEventElapsedTime(&elapsedTime, startEvent, stopEvent);
+    printf("Ackley Final F: %e (Target: 0)\n", final_f);
+    std::cout << "Time elapsed: " << elapsedTime << " ms\n";
+
+
+
+    delete[] x0;
 
     return 0;
 }
@@ -376,6 +500,22 @@ __global__ void sum_reduction_kernel(const T* input, T* output, int n) {
         atomicAdd(output, sdata[0]);
 }
 
+__global__ void dot_partial_f32_to_f64(const float* a, const float* b, double* partial, int n) {
+    __shared__ double buf[256];
+    double sum = 0.0;
+    for (int i = blockIdx.x * blockDim.x + threadIdx.x; i < n; i += blockDim.x * gridDim.x)
+        sum += (double)a[i] * (double)b[i];
+
+    buf[threadIdx.x] = sum;
+    __syncthreads();
+
+    for (int s = blockDim.x / 2; s > 0; s >>= 1) {
+        if (threadIdx.x < s) buf[threadIdx.x] += buf[threadIdx.x + s];
+        __syncthreads();
+    }
+    if (threadIdx.x == 0) partial[blockIdx.x] = buf[0];
+}
+
 /*----------------------------------------Wrapperfje---------------------------------------------------*/
 
 // Helper to get sum of a device array
@@ -446,12 +586,36 @@ inline float dot_f32(const float* a, const float* b, int n, KernelConfig cfg) {
     return h;
 }
 
+double dot_f32_accum_f64(const float* a, const float* b, int n, const KernelConfig& cfg) {
+    static double* d_partial = nullptr;
+    static double* h_partial = nullptr;
+    static int cap = 0;
+
+    int blocks = cfg.gridSize;
+    if (blocks <= 0) blocks = 1;
+
+    if (blocks > cap) {
+        if (d_partial) cudaFree(d_partial);
+        if (h_partial) free(h_partial);
+        cudaMalloc(&d_partial, blocks * sizeof(double));
+        h_partial = (double*)malloc(blocks * sizeof(double));
+        cap = blocks;
+    }
+
+    dot_partial_f32_to_f64<<<blocks, 256>>>(a, b, d_partial, n);
+    cudaMemcpy(h_partial, d_partial, blocks * sizeof(double), cudaMemcpyDeviceToHost);
+
+    double s = 0.0;
+    for (int i = 0; i < blocks; ++i) s += h_partial[i];
+    return s;
+}
+
 
 #ifndef CUDA_CHECK
 #define CUDA_CHECK(call) do {                                  \
   cudaError_t _e = (call);                                     \
   if (_e != cudaSuccess) {                                     \
-    printf("CUDA error %s:%d: %s\n", __FILE__, __LINE__,        \
+    printf("CUDA error %s:%d: %s\n", __FILE__, __LINE__,       \
            cudaGetErrorString(_e));                            \
     std::abort();                                              \
   }                                                            \
@@ -576,6 +740,8 @@ double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps) {
         CUDA_CHECK(cudaMemcpy(x_old.elems, x.elems, n * sizeof(T), cudaMemcpyDeviceToDevice));
         CUDA_CHECK(cudaMemcpy(g_old.elems, g.elems, n * sizeof(T), cudaMemcpyDeviceToDevice));
 
+        double f_old = val;
+
         for (int ls_iter = 0; ls_iter < 25; ls_iter++) {
             // x = x_old + step * d
             CUDA_CHECK(cudaMemcpy(x.elems, x_old.elems, n * sizeof(T), cudaMemcpyDeviceToDevice));
@@ -591,37 +757,52 @@ double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps) {
                 break;
             }
             step *= decay;
+
+            if (fabs(f_new - f_old) < 1e-12) {
+                // Function value not changing much; likely stuck. Break to fallback.
+                //
+                // Ako se stavi true, nastavlja u broju iteracija presitnim koracima
+                // sve do globalnog optimuma (ako je dostupan)
+                //
+                // Ako se stavi false, ide na fallback odmah i time se izbjegava gubljenje vremena,
+                // povećavajući korak da se izađe iz ravnih područja.
+                success = false;
+                break;
+            }
+            else f_old = f_new;
+
+
         }
 
         if (!success) {
-            // Hard restart + fallback small step to avoid spinning/crash
+            // Hard restart + fallback with larger steps to escape flat regions
             std::cout << "Line Search Failed -> restart + fallback step\n";
             restart = true;
             mem = 0;
             for (int i = 0; i < m; ++i) rho[i] = (T)0;
 
-            // fallback: try tiny steepest descent steps until decrease
+            // fallback: try larger steepest descent steps until decrease
             setVectorScalar<T><<<cfg.gridSize, cfg.blockSize>>>(d.elems, g.elems, (T)-1, n);
             CUDA_CHECK(cudaGetLastError());
 
-            double step_fb = 1e-6;
+            double step_fb = 0.1;
             bool ok = false;
 
             for (int t = 0; t < 40; ++t) {
-                CUDA_CHECK(cudaMemcpy(x.elems, x_old.elems, n * sizeof(T), cudaMemcpyDeviceToDevice));
-                axpy<T><<<cfg.gridSize, cfg.blockSize>>>((T)step_fb, d.elems, x.elems, n);
-                CUDA_CHECK(cudaGetLastError());
+            CUDA_CHECK(cudaMemcpy(x.elems, x_old.elems, n * sizeof(T), cudaMemcpyDeviceToDevice));
+            axpy<T><<<cfg.gridSize, cfg.blockSize>>>((T)step_fb, d.elems, x.elems, n);
+            CUDA_CHECK(cudaGetLastError());
 
-                double f_try = func.f(x.elems, n);
-                CUDA_CHECK(cudaDeviceSynchronize());
+            double f_try = func.f(x.elems, n);
+            CUDA_CHECK(cudaDeviceSynchronize());
 
-                if (f_try < val) {
-                    val = f_try;
-                    ok = true;
-                    break;
-                }
-                step_fb *= 0.1;
-                if (step_fb < 1e-20) break;
+            if (f_try < val) {
+                val = f_try;
+                ok = true;
+                break;
+            }
+            step_fb *= 2.0;
+            if (step_fb > 10.0) break;
             }
 
             if (!ok) {
@@ -663,6 +844,7 @@ double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps) {
             // keep mem as-is (still valid older pairs)
         }
     }
+
     CUDA_CHECK(cudaMemcpy(x0, x.elems, n * sizeof(T), cudaMemcpyDeviceToHost));
     delete[] rho;
     delete[] alpha_hist;

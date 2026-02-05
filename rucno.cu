@@ -463,13 +463,13 @@ double lbfgs(int n, int m, double* x0, int max_itr, Func func, const double eps)
             // Samo Rastrigin ostane vrtiti forever, ne znam zašto
 
             // Copy to host for CPU evaluation
-            cudaMemcpy(host_x_trial, x.elems, n * sizeof(double), cudaMemcpyDeviceToHost);
+  /*          cudaMemcpy(host_x_trial, x.elems, n * sizeof(double), cudaMemcpyDeviceToHost);
             cudaDeviceSynchronize();
             double f_new = func.f(host_x_trial, n);
-            
+*/
 // ovo sam mijenjao
-//            double f_new = func.f(x.elems, n);
-//            cudaDeviceSynchronize();
+            double f_new = func.f(x.elems, n);
+            cudaDeviceSynchronize();
             
             // Armijo Condition
             if (f_new <= val + c1 * step * g_dot_d) {
