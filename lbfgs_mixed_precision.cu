@@ -308,8 +308,6 @@ template <typename Func, typename T>
 double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps = 1e-9);
 
 int main(int argc, char* argv[]) {
-
-    //using T = double;
     using T = float;
     
     int N = 1 << 12;  // Problem size
