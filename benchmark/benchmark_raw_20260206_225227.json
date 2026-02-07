@@ -1,0 +1,542 @@
+[
+  [
+    ".\\lbfgs_sycl_opt.exe",
+    2338.4316000156105,
+    [
+      {
+        "name": "Quadratic",
+        "time": 14.8813
+      },
+      {
+        "name": "Rastrigin",
+        "time": 14.4515
+      },
+      {
+        "name": "Ackley",
+        "time": 30.1765
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_sycl_opt.exe",
+    202.1441999822855,
+    [
+      {
+        "name": "Quadratic",
+        "time": 14.1034
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.044
+      },
+      {
+        "name": "Ackley",
+        "time": 31.5711
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_sycl_opt.exe",
+    213.57150003314018,
+    [
+      {
+        "name": "Quadratic",
+        "time": 14.2537
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.6826
+      },
+      {
+        "name": "Ackley",
+        "time": 31.8473
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_sycl_opt.exe",
+    204.80579999275506,
+    [
+      {
+        "name": "Quadratic",
+        "time": 15.7778
+      },
+      {
+        "name": "Rastrigin",
+        "time": 15.6861
+      },
+      {
+        "name": "Ackley",
+        "time": 29.9256
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_sycl_opt.exe",
+    202.8284000698477,
+    [
+      {
+        "name": "Quadratic",
+        "time": 14.3626
+      },
+      {
+        "name": "Rastrigin",
+        "time": 14.412
+      },
+      {
+        "name": "Ackley",
+        "time": 29.9605
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_sycl_opt.exe",
+    206.7134000826627,
+    [
+      {
+        "name": "Quadratic",
+        "time": 14.0945
+      },
+      {
+        "name": "Rastrigin",
+        "time": 15.7861
+      },
+      {
+        "name": "Ackley",
+        "time": 32.8756
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_sycl_opt.exe",
+    207.37489988096058,
+    [
+      {
+        "name": "Quadratic",
+        "time": 14.7857
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.0309
+      },
+      {
+        "name": "Ackley",
+        "time": 34.2277
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_sycl_opt.exe",
+    208.95299990661442,
+    [
+      {
+        "name": "Quadratic",
+        "time": 14.8472
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.4912
+      },
+      {
+        "name": "Ackley",
+        "time": 34.7457
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_sycl_opt.exe",
+    203.1648000702262,
+    [
+      {
+        "name": "Quadratic",
+        "time": 14.5545
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.5715
+      },
+      {
+        "name": "Ackley",
+        "time": 30.3779
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_sycl_opt.exe",
+    201.5965001191944,
+    [
+      {
+        "name": "Quadratic",
+        "time": 14.1148
+      },
+      {
+        "name": "Rastrigin",
+        "time": 14.0349
+      },
+      {
+        "name": "Ackley",
+        "time": 29.7155
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_sycl_opt.exe",
+    205.40959993377328,
+    [
+      {
+        "name": "Quadratic",
+        "time": 14.0747
+      },
+      {
+        "name": "Rastrigin",
+        "time": 15.9956
+      },
+      {
+        "name": "Ackley",
+        "time": 33.4061
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_sycl_opt.exe",
+    213.0822001490742,
+    [
+      {
+        "name": "Quadratic",
+        "time": 17.8964
+      },
+      {
+        "name": "Rastrigin",
+        "time": 17.1532
+      },
+      {
+        "name": "Ackley",
+        "time": 34.0945
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_sycl_opt.exe",
+    216.84719994664192,
+    [
+      {
+        "name": "Quadratic",
+        "time": 14.9076
+      },
+      {
+        "name": "Rastrigin",
+        "time": 15.615
+      },
+      {
+        "name": "Ackley",
+        "time": 33.9351
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_sycl_opt.exe",
+    201.09170000068843,
+    [
+      {
+        "name": "Quadratic",
+        "time": 14.1091
+      },
+      {
+        "name": "Rastrigin",
+        "time": 14.308
+      },
+      {
+        "name": "Ackley",
+        "time": 30.2239
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_sycl_opt.exe",
+    209.43500008434057,
+    [
+      {
+        "name": "Quadratic",
+        "time": 14.0543
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.1253
+      },
+      {
+        "name": "Ackley",
+        "time": 34.64
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_sycl_opt.exe",
+    209.9506000522524,
+    [
+      {
+        "name": "Quadratic",
+        "time": 15.5543
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.6135
+      },
+      {
+        "name": "Ackley",
+        "time": 34.9356
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_sycl_opt.exe",
+    210.27839998714626,
+    [
+      {
+        "name": "Quadratic",
+        "time": 14.1437
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.8575
+      },
+      {
+        "name": "Ackley",
+        "time": 34.4575
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_sycl_opt.exe",
+    210.61760000884533,
+    [
+      {
+        "name": "Quadratic",
+        "time": 15.4605
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.75
+      },
+      {
+        "name": "Ackley",
+        "time": 34.1683
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_sycl_opt.exe",
+    214.0994998626411,
+    [
+      {
+        "name": "Quadratic",
+        "time": 14.967
+      },
+      {
+        "name": "Rastrigin",
+        "time": 15.3545
+      },
+      {
+        "name": "Ackley",
+        "time": 34.2445
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_sycl_opt.exe",
+    215.92980017885566,
+    [
+      {
+        "name": "Quadratic",
+        "time": 15.0987
+      },
+      {
+        "name": "Rastrigin",
+        "time": 15.2409
+      },
+      {
+        "name": "Ackley",
+        "time": 30.9931
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_sycl_opt.exe",
+    223.02370006218553,
+    [
+      {
+        "name": "Quadratic",
+        "time": 14.2742
+      },
+      {
+        "name": "Rastrigin",
+        "time": 14.1756
+      },
+      {
+        "name": "Ackley",
+        "time": 30.5441
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_sycl_opt.exe",
+    216.58879984170198,
+    [
+      {
+        "name": "Quadratic",
+        "time": 15.0321
+      },
+      {
+        "name": "Rastrigin",
+        "time": 14.2609
+      },
+      {
+        "name": "Ackley",
+        "time": 42.2225
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_sycl_opt.exe",
+    208.85270019061863,
+    [
+      {
+        "name": "Quadratic",
+        "time": 15.2921
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.867
+      },
+      {
+        "name": "Ackley",
+        "time": 33.3801
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_sycl_opt.exe",
+    205.48289990983903,
+    [
+      {
+        "name": "Quadratic",
+        "time": 16.9615
+      },
+      {
+        "name": "Rastrigin",
+        "time": 14.6062
+      },
+      {
+        "name": "Ackley",
+        "time": 29.801
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_sycl_opt.exe",
+    207.52419997006655,
+    [
+      {
+        "name": "Quadratic",
+        "time": 14.497
+      },
+      {
+        "name": "Rastrigin",
+        "time": 17.1807
+      },
+      {
+        "name": "Ackley",
+        "time": 31.2511
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_sycl_opt.exe",
+    204.6934999525547,
+    [
+      {
+        "name": "Quadratic",
+        "time": 14.3206
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.0032
+      },
+      {
+        "name": "Ackley",
+        "time": 32.0091
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_sycl_opt.exe",
+    206.94279996678233,
+    [
+      {
+        "name": "Quadratic",
+        "time": 14.159
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.6708
+      },
+      {
+        "name": "Ackley",
+        "time": 33.9406
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_sycl_opt.exe",
+    209.92709998972714,
+    [
+      {
+        "name": "Quadratic",
+        "time": 14.4739
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.6323
+      },
+      {
+        "name": "Ackley",
+        "time": 33.8031
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_sycl_opt.exe",
+    204.59400000981987,
+    [
+      {
+        "name": "Quadratic",
+        "time": 14.2725
+      },
+      {
+        "name": "Rastrigin",
+        "time": 14.0493
+      },
+      {
+        "name": "Ackley",
+        "time": 33.9485
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_sycl_opt.exe",
+    206.86440006829798,
+    [
+      {
+        "name": "Quadratic",
+        "time": 14.3752
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.5268
+      },
+      {
+        "name": "Ackley",
+        "time": 31.3572
+      }
+    ]
+  ]
+]
