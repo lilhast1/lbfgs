@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Benchmark Performance Report</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    h1 {
+      color: #333;
+      border-bottom: 3px solid #4CAF50;
+      padding-bottom: 10px;
+    }
+    h2 {
+      color: #555;
+      margin-top: 30px;
+    }
+    .summary-section {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 30px;
+    }
+    .test-section {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    th {
+      background: #4CAF50;
+      color: white;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 12px;
+      letter-spacing: 0.5px;
+    }
+    tr:hover {
+      background: #f9f9f9;
+    }
+    .speedup {
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 4px;
+      display: inline-block;
+      min-width: 60px;
+      text-align: center;
+    }
+    .speedup.fast {
+      background: #d4edda;
+      color: #155724;
+    }
+    .speedup.baseline {
+      background: #fff3cd;
+      color: #856404;
+    }
+    .speedup.slow {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    .metric {
+      font-size: 14px;
+      color: #666;
+    }
+    .timestamp {
+      color: #888;
+      font-size: 14px;
+    }
+    code {
+      background: #eee;
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Benchmark Performance Report</h1>
+  <p class="timestamp">Generated: 2026-02-08 16:04:48</p>
+
+  <div class="summary-section">
+    <h2>CPU Baselines Used</h2>
+    <p class="metric">
+      Speedups are computed against these fixed CPU runtimes (ms):
+      <code>Rastrigin=1471.608</code>,
+      <code>Ackley=1067.344</code>,
+      <code>Rosenbrock=34786.647</code>.
+    </p>
+  </div>
+
+  <div class="summary-section">
+    <h2>Total Speedup (Ackley + Rastrigin + Rosenbrock)</h2>
+    <p class="metric">CPU Total: <strong>37325.599 ms</strong></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Version</th>
+          <th>GPU Total Avg (ms)</th>
+          <th>Total Speedup vs CPU</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <tr>
+          <td><strong>lbfgs_cublas.exe</strong></td>
+          <td>146.093 ms</td>
+          <td><span class="speedup fast">255.49x</span></td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_cublas_new.exe</strong></td>
+          <td>1194.056 ms</td>
+          <td><span class="speedup fast">31.26x</span></td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_dotAtomicKernel.exe</strong></td>
+          <td>239.000 ms</td>
+          <td><span class="speedup fast">156.17x</span></td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_dotF64Kernel.exe</strong></td>
+          <td>192.011 ms</td>
+          <td><span class="speedup fast">194.39x</span></td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_dotKernel.exe</strong></td>
+          <td>231.276 ms</td>
+          <td><span class="speedup fast">161.39x</span></td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Per Test Case Performance</h2>
+
+  <div class="test-section">
+    <h3>Ackley</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Version</th>
+          <th>GPU Avg Time (ms)</th>
+          <th>Samples</th>
+          <th>CPU Baseline (ms)</th>
+          <th>Speedup vs CPU</th>
+          <th>Avg |F - Target|</th>
+          <th>Avg Final F</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <tr>
+          <td><strong>lbfgs_cublas.exe</strong></td>
+          <td>45.409 ms</td>
+          <td>20</td>
+          <td>1067.344</td>
+          <td><span class="speedup fast">23.51x</span></td>
+          <td>6.451e+04</td>
+          <td>6.451e+04</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_cublas_new.exe</strong></td>
+          <td>24.007 ms</td>
+          <td>20</td>
+          <td>1067.344</td>
+          <td><span class="speedup fast">44.46x</span></td>
+          <td>3.906e-03</td>
+          <td>3.906e-03</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_dotAtomicKernel.exe</strong></td>
+          <td>39.346 ms</td>
+          <td>20</td>
+          <td>1067.344</td>
+          <td><span class="speedup fast">27.13x</span></td>
+          <td>9.244e-05</td>
+          <td>9.244e-05</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_dotF64Kernel.exe</strong></td>
+          <td>16.571 ms</td>
+          <td>20</td>
+          <td>1067.344</td>
+          <td><span class="speedup fast">64.41x</span></td>
+          <td>1.127e+03</td>
+          <td>1.127e+03</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_dotKernel.exe</strong></td>
+          <td>30.612 ms</td>
+          <td>20</td>
+          <td>1067.344</td>
+          <td><span class="speedup fast">34.87x</span></td>
+          <td>2.215e-04</td>
+          <td>2.215e-04</td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <div class="test-section">
+    <h3>Quadratic</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Version</th>
+          <th>GPU Avg Time (ms)</th>
+          <th>Samples</th>
+          <th>CPU Baseline (ms)</th>
+          <th>Speedup vs CPU</th>
+          <th>Avg |F - Target|</th>
+          <th>Avg Final F</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <tr>
+          <td><strong>lbfgs_cublas.exe</strong></td>
+          <td>14.040 ms</td>
+          <td>20</td>
+          <td>n/a</td>
+          <td><span class="speedup baseline">n/a</span></td>
+          <td>0.000e+00</td>
+          <td>0.000e+00</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_cublas_new.exe</strong></td>
+          <td>14.012 ms</td>
+          <td>20</td>
+          <td>n/a</td>
+          <td><span class="speedup baseline">n/a</span></td>
+          <td>0.000e+00</td>
+          <td>0.000e+00</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_dotAtomicKernel.exe</strong></td>
+          <td>86.622 ms</td>
+          <td>20</td>
+          <td>n/a</td>
+          <td><span class="speedup baseline">n/a</span></td>
+          <td>2.473e-13</td>
+          <td>2.473e-13</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_dotF64Kernel.exe</strong></td>
+          <td>85.441 ms</td>
+          <td>20</td>
+          <td>n/a</td>
+          <td><span class="speedup baseline">n/a</span></td>
+          <td>2.473e-13</td>
+          <td>2.473e-13</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_dotKernel.exe</strong></td>
+          <td>87.247 ms</td>
+          <td>20</td>
+          <td>n/a</td>
+          <td><span class="speedup baseline">n/a</span></td>
+          <td>2.473e-13</td>
+          <td>2.473e-13</td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <div class="test-section">
+    <h3>Rastrigin</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Version</th>
+          <th>GPU Avg Time (ms)</th>
+          <th>Samples</th>
+          <th>CPU Baseline (ms)</th>
+          <th>Speedup vs CPU</th>
+          <th>Avg |F - Target|</th>
+          <th>Avg Final F</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <tr>
+          <td><strong>lbfgs_cublas.exe</strong></td>
+          <td>69.114 ms</td>
+          <td>20</td>
+          <td>1471.608</td>
+          <td><span class="speedup fast">21.29x</span></td>
+          <td>2.546e+06</td>
+          <td>2.546e+06</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_cublas_new.exe</strong></td>
+          <td>16.485 ms</td>
+          <td>20</td>
+          <td>1471.608</td>
+          <td><span class="speedup fast">89.27x</span></td>
+          <td>0.000e+00</td>
+          <td>0.000e+00</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_dotAtomicKernel.exe</strong></td>
+          <td>15.430 ms</td>
+          <td>20</td>
+          <td>1471.608</td>
+          <td><span class="speedup fast">95.37x</span></td>
+          <td>4.139e+03</td>
+          <td>4.139e+03</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_dotF64Kernel.exe</strong></td>
+          <td>17.523 ms</td>
+          <td>20</td>
+          <td>1471.608</td>
+          <td><span class="speedup fast">83.98x</span></td>
+          <td>4.081e+03</td>
+          <td>4.081e+03</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_dotKernel.exe</strong></td>
+          <td>17.501 ms</td>
+          <td>20</td>
+          <td>1471.608</td>
+          <td><span class="speedup fast">84.09x</span></td>
+          <td>4.081e+03</td>
+          <td>4.081e+03</td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <div class="test-section">
+    <h3>Rosenbrock</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Version</th>
+          <th>GPU Avg Time (ms)</th>
+          <th>Samples</th>
+          <th>CPU Baseline (ms)</th>
+          <th>Speedup vs CPU</th>
+          <th>Avg |F - Target|</th>
+          <th>Avg Final F</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <tr>
+          <td><strong>lbfgs_cublas.exe</strong></td>
+          <td>31.570 ms</td>
+          <td>20</td>
+          <td>34786.647</td>
+          <td><span class="speedup fast">1101.89x</span></td>
+          <td>1.497e+32</td>
+          <td>1.497e+32</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_cublas_new.exe</strong></td>
+          <td>1153.563 ms</td>
+          <td>20</td>
+          <td>34786.647</td>
+          <td><span class="speedup fast">30.16x</span></td>
+          <td>9.592e-13</td>
+          <td>9.592e-13</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_dotAtomicKernel.exe</strong></td>
+          <td>184.224 ms</td>
+          <td>20</td>
+          <td>34786.647</td>
+          <td><span class="speedup fast">188.83x</span></td>
+          <td>2.787e-09</td>
+          <td>2.787e-09</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_dotF64Kernel.exe</strong></td>
+          <td>157.917 ms</td>
+          <td>20</td>
+          <td>34786.647</td>
+          <td><span class="speedup fast">220.28x</span></td>
+          <td>2.856e-12</td>
+          <td>2.856e-12</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_dotKernel.exe</strong></td>
+          <td>183.164 ms</td>
+          <td>20</td>
+          <td>34786.647</td>
+          <td><span class="speedup fast">189.92x</span></td>
+          <td>3.141e-12</td>
+          <td>3.141e-12</td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+</body>
+</html>

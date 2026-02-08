@@ -12,7 +12,7 @@
 
 #include "src/utils/functions.h"
 
-#define BLOCK_SIZE 64
+#define BLOCK_SIZE 256
 
 double gpu_sum(double* d_elements, int n);
 
@@ -275,11 +275,13 @@ __global__ void ackley_kernel(const T* x, T* f_vals, T* g, int n) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i < n) {
         T xi = x[i];
+        T r = sqrt(xi * xi);
         if (f_vals)
             f_vals[i] = -20.0 * exp(-0.2 * sqrt(xi * xi)) - exp(cos(2.0 * M_PI * xi)) + 20.0 + M_E;
+        if (r < (T)1e-12) 
+            r = (T)1e-12;
         if (g)
-            g[i] = 4.0 * xi * exp(-0.2 * sqrt(xi * xi)) / sqrt(xi * xi) + 2.0 * M_PI * sin(2.0 * M_PI * xi) * exp(cos(2.0 * M_PI * xi));
-    }
+            g[i] = (T)4.0 * xi * exp(-0.2 * r) / r + 2.0 * M_PI * sin(2.0 * M_PI * xi) * exp(cos(2.0 * M_PI * xi));    }
 }
 
 // Wrapper za Ackley test
@@ -321,13 +323,13 @@ int main(int argc, char* argv[]) {
     float elapsedTime;
 
     // --- TEST 1: QUADRATIC ---
-    for (int i = 0; i < N; i++) x0[i] = 8.0;  // Start far away
+    for (int i = 0; i < N; i++) x0[i] = 8.0f;  // Start far away
     QuadraticTest<T> quad(N);
     
     printf("Starting: Quadratic...\n");
     
     cudaEventRecord(startEvent);
-    double final_f = lbfgs(N, M, x0, 1000, quad, 1e-6);
+    double final_f = lbfgs(N, M, x0, 1000, quad, 1e-6f);
     cudaEventRecord(stopEvent);
 
     cudaEventSynchronize(stopEvent);
@@ -336,13 +338,13 @@ int main(int argc, char* argv[]) {
     std::cout << "Time elapsed: " << elapsedTime << " ms\n";
 
     // --- TEST 2: ROSENBROCK [-5, 10]^N ---
-    for (int i = 0; i < N; i++) x0[i] = -4.2;  // Standard starting point
+    for (int i = 0; i < N; i++) x0[i] = -4.2f;  // Standard starting point
     RosenbrockTest<T> rosen(N);
 
     printf("Starting: Rosenbrock...\n");
 
     cudaEventRecord(startEvent);
-    final_f = lbfgs(N, M, x0, 5000, rosen, 1e-6);
+    final_f = lbfgs(N, M, x0, 500, rosen, 1e-6f);
     cudaEventRecord(stopEvent);
 
     cudaEventSynchronize(stopEvent);
@@ -371,13 +373,13 @@ int main(int argc, char* argv[]) {
 
 
     // --- TEST 4: Rastrigin [-5.12, 5.12]^N ---
-    for (int i = 0; i < N; i++) x0[i] = -1.2;  // Standard starting point
+    for (int i = 0; i < N; i++) x0[i] = -1.2f;  // Standard starting point
     RastriginTest<T> rastrigin(N);
 
     printf("Starting: Rastrigin...\n");
 
     cudaEventRecord(startEvent);
-    final_f = lbfgs(N, M, x0, 5000, rastrigin, 1e-6);
+    final_f = lbfgs(N, M, x0, 5000, rastrigin, 1e-6f);
     cudaEventRecord(stopEvent);
 
     cudaEventSynchronize(stopEvent);
@@ -386,12 +388,12 @@ int main(int argc, char* argv[]) {
     std::cout << "Time elapsed: " << elapsedTime << " ms\n";
 
     // --- TEST 5: Ackley [-32.768, 32.768]^N ---
-    for (int i = 0; i < N; i++) x0[i] = -4;
+    for (int i = 0; i < N; i++) x0[i] = -4.0f;
     AckleyTest<T> ackley(N);
     printf("Starting: Ackley...\n");
 
     cudaEventRecord(startEvent);
-    final_f = lbfgs(N, M, x0, 5000, ackley, 1e-6);
+    final_f = lbfgs(N, M, x0, 5000, ackley, 1e-6f);
     cudaEventRecord(stopEvent);
 
     cudaEventSynchronize(stopEvent);
@@ -781,7 +783,7 @@ double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps) {
             }
             step *= decay;
 
-            if (fabs(f_new - f_old) < 1e-12) {
+            if (fabs(f_new - f_old) < 1e-12 * (1.0 + fabs(f_old))) {
                 // Function value not changing much; likely stuck. Break to fallback.
                 //
                 // Ako se stavi TRUE, nastavlja u broju iteracija jako sitnim koracima

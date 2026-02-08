@@ -17,9 +17,9 @@ HTML_REPORT = f"{OUT_DIR}/benchmark_report_{TS}.html"
 
 # CPU baselines (ms) for speedup calculation
 CPU_BASELINES_MS = {
-    "Rastrigin": 2326.843,
-    "Ackley": 2039.391,
-    "Rosenbrock": 57395.111,
+    "Rastrigin": 1471.608,
+    "Ackley": 1067.344,
+    "Rosenbrock": 34786.647,
 }
 
 def find_exec_files(directory: str, debug=False):
