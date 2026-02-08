@@ -678,7 +678,7 @@ double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps) {
 
     for (int k = 0; k < max_itr; k++) {
         // gradient norm
-        double g_norm = std::sqrt(dot(g.elems, g.elems, n, &dw));
+        double g_norm = std::sqrt(dot_f32_accum_f64(g.elems, g.elems, n, cfg));
         if (g_norm < eps) break;
 
         // 1) Compute search direction d
@@ -700,7 +700,7 @@ double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps) {
                 // if rho[idx]==0, pair is inactive; skip
                 if (rho[idx] == (T)0) { alpha_hist[idx] = (T)0; continue; }
 
-                double s_dot_q = dot(S.elems + idx * n, q.elems, n, &dw);
+                double s_dot_q = dot_f32_accum_f64(S.elems + idx * n, q.elems, n, cfg);
                 alpha_hist[idx] = (T)(rho[idx] * (T)s_dot_q);
 
                 axpy<T><<<cfg.gridSize, cfg.blockSize>>>((T)(-alpha_hist[idx]),
@@ -715,8 +715,8 @@ double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps) {
 
             double gamma = 1.0;
             if (rho[last_idx] != (T)0) {
-                double s_dot_y = dot(S.elems + last_idx * n, Y.elems + last_idx * n, n, &dw);
-                double y_dot_y = dot(Y.elems + last_idx * n, Y.elems + last_idx * n, n, &dw);
+                double s_dot_y = dot_f32_accum_f64(S.elems + last_idx * n, Y.elems + last_idx * n, n, cfg);
+                double y_dot_y = dot_f32_accum_f64(Y.elems + last_idx * n, Y.elems + last_idx * n, n, cfg);
                 gamma = (y_dot_y > 1e-18) ? (s_dot_y / y_dot_y) : 1.0;
             }
 
@@ -730,7 +730,7 @@ double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps) {
 
                 if (rho[idx] == (T)0) continue;
 
-                double y_dot_r = dot(Y.elems + idx * n, r.elems, n, &dw);
+                double y_dot_r = dot_f32_accum_f64(Y.elems + idx * n, r.elems, n, cfg);
                 double beta = (double)rho[idx] * y_dot_r;
 
                 axpy<T><<<cfg.gridSize, cfg.blockSize>>>((T)(alpha_hist[idx] - (T)beta),
@@ -744,7 +744,7 @@ double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps) {
         }
 
         // 2) Backtracking line search (GPU f(x))
-        double g_dot_d = dot(g.elems, d.elems, n, &dw);
+        double g_dot_d = dot_f32_accum_f64(g.elems, d.elems, n, cfg);
 
         // If not a descent direction, restart to steepest descent
         if (g_dot_d >= 0.0) {
@@ -753,7 +753,7 @@ double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps) {
             for (int i = 0; i < m; ++i) rho[i] = (T)0;
             setVectorScalar<T><<<cfg.gridSize, cfg.blockSize>>>(d.elems, g.elems, (T)-1, n);
             CUDA_CHECK(cudaGetLastError());
-            g_dot_d = dot(g.elems, d.elems, n, &dw);
+            g_dot_d = dot_f32_accum_f64(g.elems, d.elems, n, cfg);
         }
 
         const double c1 = 1e-4;
@@ -857,7 +857,7 @@ double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps) {
         axpy<T><<<cfg.gridSize, cfg.blockSize>>>((T)-1, g_old.elems, Y.elems + cur * n, n);
         CUDA_CHECK(cudaGetLastError());
 
-        double sy = dot(S.elems + cur * n, Y.elems + cur * n, n, &dw);
+        double sy = dot_f32_accum_f64(S.elems + cur * n, Y.elems + cur * n, n, cfg);
 
         if (sy > 1e-12) {
             rho[cur] = (T)(1.0 / sy);
