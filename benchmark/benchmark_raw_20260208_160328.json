@@ -1,0 +1,3402 @@
+[
+  [
+    ".\\lbfgs_cublas.exe",
+    336.6618000145536,
+    [
+      {
+        "name": "Quadratic",
+        "time": 14.6228,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 37.217,
+        "final_f": 1.497385e+32,
+        "target": 0.0,
+        "abs_err": 1.497385e+32
+      },
+      {
+        "name": "Rastrigin",
+        "time": 66.8521,
+        "final_f": 2546245.0,
+        "target": 0.0,
+        "abs_err": 2546245.0
+      },
+      {
+        "name": "Ackley",
+        "time": 39.893,
+        "final_f": 64513.15,
+        "target": 0.0,
+        "abs_err": 64513.15
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas.exe",
+    342.3845999932382,
+    [
+      {
+        "name": "Quadratic",
+        "time": 14.3892,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 34.7659,
+        "final_f": 1.497385e+32,
+        "target": 0.0,
+        "abs_err": 1.497385e+32
+      },
+      {
+        "name": "Rastrigin",
+        "time": 70.6681,
+        "final_f": 2546245.0,
+        "target": 0.0,
+        "abs_err": 2546245.0
+      },
+      {
+        "name": "Ackley",
+        "time": 38.7698,
+        "final_f": 64513.15,
+        "target": 0.0,
+        "abs_err": 64513.15
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas.exe",
+    325.49469999503344,
+    [
+      {
+        "name": "Quadratic",
+        "time": 14.5998,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 28.7996,
+        "final_f": 1.497385e+32,
+        "target": 0.0,
+        "abs_err": 1.497385e+32
+      },
+      {
+        "name": "Rastrigin",
+        "time": 61.9711,
+        "final_f": 2546245.0,
+        "target": 0.0,
+        "abs_err": 2546245.0
+      },
+      {
+        "name": "Ackley",
+        "time": 43.6893,
+        "final_f": 64513.15,
+        "target": 0.0,
+        "abs_err": 64513.15
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas.exe",
+    332.7096000139136,
+    [
+      {
+        "name": "Quadratic",
+        "time": 16.2027,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 24.7355,
+        "final_f": 1.497385e+32,
+        "target": 0.0,
+        "abs_err": 1.497385e+32
+      },
+      {
+        "name": "Rastrigin",
+        "time": 63.4064,
+        "final_f": 2546245.0,
+        "target": 0.0,
+        "abs_err": 2546245.0
+      },
+      {
+        "name": "Ackley",
+        "time": 47.7652,
+        "final_f": 64513.15,
+        "target": 0.0,
+        "abs_err": 64513.15
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas.exe",
+    327.9483999940567,
+    [
+      {
+        "name": "Quadratic",
+        "time": 13.95,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 22.4879,
+        "final_f": 1.497385e+32,
+        "target": 0.0,
+        "abs_err": 1.497385e+32
+      },
+      {
+        "name": "Rastrigin",
+        "time": 56.8145,
+        "final_f": 2546245.0,
+        "target": 0.0,
+        "abs_err": 2546245.0
+      },
+      {
+        "name": "Ackley",
+        "time": 49.4268,
+        "final_f": 64513.15,
+        "target": 0.0,
+        "abs_err": 64513.15
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas.exe",
+    333.8639999856241,
+    [
+      {
+        "name": "Quadratic",
+        "time": 12.8695,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 24.7124,
+        "final_f": 1.497385e+32,
+        "target": 0.0,
+        "abs_err": 1.497385e+32
+      },
+      {
+        "name": "Rastrigin",
+        "time": 68.0622,
+        "final_f": 2546245.0,
+        "target": 0.0,
+        "abs_err": 2546245.0
+      },
+      {
+        "name": "Ackley",
+        "time": 42.2157,
+        "final_f": 64513.15,
+        "target": 0.0,
+        "abs_err": 64513.15
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas.exe",
+    338.282300013816,
+    [
+      {
+        "name": "Quadratic",
+        "time": 13.5124,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 33.8363,
+        "final_f": 1.497385e+32,
+        "target": 0.0,
+        "abs_err": 1.497385e+32
+      },
+      {
+        "name": "Rastrigin",
+        "time": 56.9588,
+        "final_f": 2546245.0,
+        "target": 0.0,
+        "abs_err": 2546245.0
+      },
+      {
+        "name": "Ackley",
+        "time": 54.2407,
+        "final_f": 64513.15,
+        "target": 0.0,
+        "abs_err": 64513.15
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas.exe",
+    340.3866999724414,
+    [
+      {
+        "name": "Quadratic",
+        "time": 13.9122,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 24.6425,
+        "final_f": 1.497385e+32,
+        "target": 0.0,
+        "abs_err": 1.497385e+32
+      },
+      {
+        "name": "Rastrigin",
+        "time": 75.1976,
+        "final_f": 2546245.0,
+        "target": 0.0,
+        "abs_err": 2546245.0
+      },
+      {
+        "name": "Ackley",
+        "time": 40.5734,
+        "final_f": 64513.15,
+        "target": 0.0,
+        "abs_err": 64513.15
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas.exe",
+    360.2461999980733,
+    [
+      {
+        "name": "Quadratic",
+        "time": 15.8093,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 30.6811,
+        "final_f": 1.497385e+32,
+        "target": 0.0,
+        "abs_err": 1.497385e+32
+      },
+      {
+        "name": "Rastrigin",
+        "time": 80.3855,
+        "final_f": 2546245.0,
+        "target": 0.0,
+        "abs_err": 2546245.0
+      },
+      {
+        "name": "Ackley",
+        "time": 49.5341,
+        "final_f": 64513.15,
+        "target": 0.0,
+        "abs_err": 64513.15
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas.exe",
+    350.7910000043921,
+    [
+      {
+        "name": "Quadratic",
+        "time": 13.0099,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 26.0018,
+        "final_f": 1.497385e+32,
+        "target": 0.0,
+        "abs_err": 1.497385e+32
+      },
+      {
+        "name": "Rastrigin",
+        "time": 72.2977,
+        "final_f": 2546245.0,
+        "target": 0.0,
+        "abs_err": 2546245.0
+      },
+      {
+        "name": "Ackley",
+        "time": 52.6744,
+        "final_f": 64513.15,
+        "target": 0.0,
+        "abs_err": 64513.15
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas.exe",
+    353.3562000084203,
+    [
+      {
+        "name": "Quadratic",
+        "time": 13.8682,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 41.9765,
+        "final_f": 1.497385e+32,
+        "target": 0.0,
+        "abs_err": 1.497385e+32
+      },
+      {
+        "name": "Rastrigin",
+        "time": 73.7332,
+        "final_f": 2546245.0,
+        "target": 0.0,
+        "abs_err": 2546245.0
+      },
+      {
+        "name": "Ackley",
+        "time": 46.4821,
+        "final_f": 64513.15,
+        "target": 0.0,
+        "abs_err": 64513.15
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas.exe",
+    336.66420000372455,
+    [
+      {
+        "name": "Quadratic",
+        "time": 13.1754,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 24.6685,
+        "final_f": 1.497385e+32,
+        "target": 0.0,
+        "abs_err": 1.497385e+32
+      },
+      {
+        "name": "Rastrigin",
+        "time": 85.7224,
+        "final_f": 2546245.0,
+        "target": 0.0,
+        "abs_err": 2546245.0
+      },
+      {
+        "name": "Ackley",
+        "time": 41.9264,
+        "final_f": 64513.15,
+        "target": 0.0,
+        "abs_err": 64513.15
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas.exe",
+    340.2490000007674,
+    [
+      {
+        "name": "Quadratic",
+        "time": 14.6562,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 33.4504,
+        "final_f": 1.497385e+32,
+        "target": 0.0,
+        "abs_err": 1.497385e+32
+      },
+      {
+        "name": "Rastrigin",
+        "time": 66.0139,
+        "final_f": 2546245.0,
+        "target": 0.0,
+        "abs_err": 2546245.0
+      },
+      {
+        "name": "Ackley",
+        "time": 51.2522,
+        "final_f": 64513.15,
+        "target": 0.0,
+        "abs_err": 64513.15
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas.exe",
+    353.79720001947135,
+    [
+      {
+        "name": "Quadratic",
+        "time": 13.2009,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 38.7939,
+        "final_f": 1.497385e+32,
+        "target": 0.0,
+        "abs_err": 1.497385e+32
+      },
+      {
+        "name": "Rastrigin",
+        "time": 77.0744,
+        "final_f": 2546245.0,
+        "target": 0.0,
+        "abs_err": 2546245.0
+      },
+      {
+        "name": "Ackley",
+        "time": 40.0347,
+        "final_f": 64513.15,
+        "target": 0.0,
+        "abs_err": 64513.15
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas.exe",
+    347.29090001201257,
+    [
+      {
+        "name": "Quadratic",
+        "time": 14.1829,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 31.8585,
+        "final_f": 1.497385e+32,
+        "target": 0.0,
+        "abs_err": 1.497385e+32
+      },
+      {
+        "name": "Rastrigin",
+        "time": 65.4293,
+        "final_f": 2546245.0,
+        "target": 0.0,
+        "abs_err": 2546245.0
+      },
+      {
+        "name": "Ackley",
+        "time": 49.1018,
+        "final_f": 64513.15,
+        "target": 0.0,
+        "abs_err": 64513.15
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas.exe",
+    349.1479999793228,
+    [
+      {
+        "name": "Quadratic",
+        "time": 13.6451,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 35.8468,
+        "final_f": 1.497385e+32,
+        "target": 0.0,
+        "abs_err": 1.497385e+32
+      },
+      {
+        "name": "Rastrigin",
+        "time": 76.3835,
+        "final_f": 2546245.0,
+        "target": 0.0,
+        "abs_err": 2546245.0
+      },
+      {
+        "name": "Ackley",
+        "time": 44.6427,
+        "final_f": 64513.15,
+        "target": 0.0,
+        "abs_err": 64513.15
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas.exe",
+    331.56469999812543,
+    [
+      {
+        "name": "Quadratic",
+        "time": 13.0632,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 29.4301,
+        "final_f": 1.497385e+32,
+        "target": 0.0,
+        "abs_err": 1.497385e+32
+      },
+      {
+        "name": "Rastrigin",
+        "time": 65.3403,
+        "final_f": 2546245.0,
+        "target": 0.0,
+        "abs_err": 2546245.0
+      },
+      {
+        "name": "Ackley",
+        "time": 40.3159,
+        "final_f": 64513.15,
+        "target": 0.0,
+        "abs_err": 64513.15
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas.exe",
+    328.6385999817867,
+    [
+      {
+        "name": "Quadratic",
+        "time": 14.466,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 33.8714,
+        "final_f": 1.497385e+32,
+        "target": 0.0,
+        "abs_err": 1.497385e+32
+      },
+      {
+        "name": "Rastrigin",
+        "time": 54.016,
+        "final_f": 2546245.0,
+        "target": 0.0,
+        "abs_err": 2546245.0
+      },
+      {
+        "name": "Ackley",
+        "time": 43.4917,
+        "final_f": 64513.15,
+        "target": 0.0,
+        "abs_err": 64513.15
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas.exe",
+    341.5923999855295,
+    [
+      {
+        "name": "Quadratic",
+        "time": 13.4628,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 31.9077,
+        "final_f": 1.497385e+32,
+        "target": 0.0,
+        "abs_err": 1.497385e+32
+      },
+      {
+        "name": "Rastrigin",
+        "time": 69.0897,
+        "final_f": 2546245.0,
+        "target": 0.0,
+        "abs_err": 2546245.0
+      },
+      {
+        "name": "Ackley",
+        "time": 47.0764,
+        "final_f": 64513.15,
+        "target": 0.0,
+        "abs_err": 64513.15
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas.exe",
+    359.55580000882037,
+    [
+      {
+        "name": "Quadratic",
+        "time": 14.2114,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 41.7181,
+        "final_f": 1.497385e+32,
+        "target": 0.0,
+        "abs_err": 1.497385e+32
+      },
+      {
+        "name": "Rastrigin",
+        "time": 76.8535,
+        "final_f": 2546245.0,
+        "target": 0.0,
+        "abs_err": 2546245.0
+      },
+      {
+        "name": "Ackley",
+        "time": 45.074,
+        "final_f": 64513.15,
+        "target": 0.0,
+        "abs_err": 64513.15
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas_new.exe",
+    1413.0513000127394,
+    [
+      {
+        "name": "Quadratic",
+        "time": 13.5921,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 1176.29,
+        "final_f": 9.59232e-13,
+        "target": 0.0,
+        "abs_err": 9.59232e-13
+      },
+      {
+        "name": "Rastrigin",
+        "time": 18.2261,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Ackley",
+        "time": 28.1344,
+        "final_f": 0.00390625,
+        "target": 0.0,
+        "abs_err": 0.00390625
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas_new.exe",
+    1372.8077000123449,
+    [
+      {
+        "name": "Quadratic",
+        "time": 13.6124,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 1144.45,
+        "final_f": 9.59232e-13,
+        "target": 0.0,
+        "abs_err": 9.59232e-13
+      },
+      {
+        "name": "Rastrigin",
+        "time": 17.9868,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Ackley",
+        "time": 21.1301,
+        "final_f": 0.00390625,
+        "target": 0.0,
+        "abs_err": 0.00390625
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas_new.exe",
+    1325.4852000100072,
+    [
+      {
+        "name": "Quadratic",
+        "time": 13.8208,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 1086.73,
+        "final_f": 9.59232e-13,
+        "target": 0.0,
+        "abs_err": 9.59232e-13
+      },
+      {
+        "name": "Rastrigin",
+        "time": 14.0708,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Ackley",
+        "time": 24.673,
+        "final_f": 0.00390625,
+        "target": 0.0,
+        "abs_err": 0.00390625
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas_new.exe",
+    1396.2517000036314,
+    [
+      {
+        "name": "Quadratic",
+        "time": 13.6579,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 1161.51,
+        "final_f": 9.59232e-13,
+        "target": 0.0,
+        "abs_err": 9.59232e-13
+      },
+      {
+        "name": "Rastrigin",
+        "time": 17.3399,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Ackley",
+        "time": 27.1258,
+        "final_f": 0.00390625,
+        "target": 0.0,
+        "abs_err": 0.00390625
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas_new.exe",
+    1387.9553999868222,
+    [
+      {
+        "name": "Quadratic",
+        "time": 14.073,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 1153.61,
+        "final_f": 9.59232e-13,
+        "target": 0.0,
+        "abs_err": 9.59232e-13
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.8375,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Ackley",
+        "time": 26.2781,
+        "final_f": 0.00390625,
+        "target": 0.0,
+        "abs_err": 0.00390625
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas_new.exe",
+    1406.6027000080794,
+    [
+      {
+        "name": "Quadratic",
+        "time": 13.4664,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 1176.08,
+        "final_f": 9.59232e-13,
+        "target": 0.0,
+        "abs_err": 9.59232e-13
+      },
+      {
+        "name": "Rastrigin",
+        "time": 17.5805,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Ackley",
+        "time": 20.857,
+        "final_f": 0.00390625,
+        "target": 0.0,
+        "abs_err": 0.00390625
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas_new.exe",
+    1456.5394000092056,
+    [
+      {
+        "name": "Quadratic",
+        "time": 13.3569,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 1220.21,
+        "final_f": 9.59232e-13,
+        "target": 0.0,
+        "abs_err": 9.59232e-13
+      },
+      {
+        "name": "Rastrigin",
+        "time": 14.7973,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Ackley",
+        "time": 26.9963,
+        "final_f": 0.00390625,
+        "target": 0.0,
+        "abs_err": 0.00390625
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas_new.exe",
+    1323.9134000032209,
+    [
+      {
+        "name": "Quadratic",
+        "time": 12.5155,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 1100.06,
+        "final_f": 9.59232e-13,
+        "target": 0.0,
+        "abs_err": 9.59232e-13
+      },
+      {
+        "name": "Rastrigin",
+        "time": 14.9332,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Ackley",
+        "time": 21.7509,
+        "final_f": 0.00390625,
+        "target": 0.0,
+        "abs_err": 0.00390625
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas_new.exe",
+    1497.065700008534,
+    [
+      {
+        "name": "Quadratic",
+        "time": 14.018,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 1252.65,
+        "final_f": 9.59232e-13,
+        "target": 0.0,
+        "abs_err": 9.59232e-13
+      },
+      {
+        "name": "Rastrigin",
+        "time": 19.9333,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Ackley",
+        "time": 28.962,
+        "final_f": 0.00390625,
+        "target": 0.0,
+        "abs_err": 0.00390625
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas_new.exe",
+    1475.0745999917854,
+    [
+      {
+        "name": "Quadratic",
+        "time": 14.0777,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 1085.71,
+        "final_f": 9.59232e-13,
+        "target": 0.0,
+        "abs_err": 9.59232e-13
+      },
+      {
+        "name": "Rastrigin",
+        "time": 14.645,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Ackley",
+        "time": 30.6389,
+        "final_f": 0.00390625,
+        "target": 0.0,
+        "abs_err": 0.00390625
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas_new.exe",
+    1530.1982999953907,
+    [
+      {
+        "name": "Quadratic",
+        "time": 18.3292,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 1148.39,
+        "final_f": 9.59232e-13,
+        "target": 0.0,
+        "abs_err": 9.59232e-13
+      },
+      {
+        "name": "Rastrigin",
+        "time": 13.5073,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Ackley",
+        "time": 21.8523,
+        "final_f": 0.00390625,
+        "target": 0.0,
+        "abs_err": 0.00390625
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas_new.exe",
+    1420.7437000004575,
+    [
+      {
+        "name": "Quadratic",
+        "time": 14.0162,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 1177.62,
+        "final_f": 9.59232e-13,
+        "target": 0.0,
+        "abs_err": 9.59232e-13
+      },
+      {
+        "name": "Rastrigin",
+        "time": 15.9054,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Ackley",
+        "time": 21.5363,
+        "final_f": 0.00390625,
+        "target": 0.0,
+        "abs_err": 0.00390625
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas_new.exe",
+    1361.0510000144131,
+    [
+      {
+        "name": "Quadratic",
+        "time": 13.4313,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 1111.69,
+        "final_f": 9.59232e-13,
+        "target": 0.0,
+        "abs_err": 9.59232e-13
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.0956,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Ackley",
+        "time": 22.1972,
+        "final_f": 0.00390625,
+        "target": 0.0,
+        "abs_err": 0.00390625
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas_new.exe",
+    1467.4796000181232,
+    [
+      {
+        "name": "Quadratic",
+        "time": 14.839,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 1089.28,
+        "final_f": 9.59232e-13,
+        "target": 0.0,
+        "abs_err": 9.59232e-13
+      },
+      {
+        "name": "Rastrigin",
+        "time": 19.9613,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Ackley",
+        "time": 24.1284,
+        "final_f": 0.00390625,
+        "target": 0.0,
+        "abs_err": 0.00390625
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas_new.exe",
+    1346.7792999872472,
+    [
+      {
+        "name": "Quadratic",
+        "time": 13.4619,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 1099.09,
+        "final_f": 9.59232e-13,
+        "target": 0.0,
+        "abs_err": 9.59232e-13
+      },
+      {
+        "name": "Rastrigin",
+        "time": 14.904,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Ackley",
+        "time": 26.9009,
+        "final_f": 0.00390625,
+        "target": 0.0,
+        "abs_err": 0.00390625
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas_new.exe",
+    1442.3274000000674,
+    [
+      {
+        "name": "Quadratic",
+        "time": 14.0631,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 1200.35,
+        "final_f": 9.59232e-13,
+        "target": 0.0,
+        "abs_err": 9.59232e-13
+      },
+      {
+        "name": "Rastrigin",
+        "time": 15.2009,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Ackley",
+        "time": 21.51,
+        "final_f": 0.00390625,
+        "target": 0.0,
+        "abs_err": 0.00390625
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas_new.exe",
+    1418.5128999815788,
+    [
+      {
+        "name": "Quadratic",
+        "time": 13.6707,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 1183.32,
+        "final_f": 9.59232e-13,
+        "target": 0.0,
+        "abs_err": 9.59232e-13
+      },
+      {
+        "name": "Rastrigin",
+        "time": 17.4897,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Ackley",
+        "time": 21.6817,
+        "final_f": 0.00390625,
+        "target": 0.0,
+        "abs_err": 0.00390625
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas_new.exe",
+    1369.7241000190843,
+    [
+      {
+        "name": "Quadratic",
+        "time": 13.8062,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 1131.78,
+        "final_f": 9.59232e-13,
+        "target": 0.0,
+        "abs_err": 9.59232e-13
+      },
+      {
+        "name": "Rastrigin",
+        "time": 20.3736,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Ackley",
+        "time": 21.6817,
+        "final_f": 0.00390625,
+        "target": 0.0,
+        "abs_err": 0.00390625
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas_new.exe",
+    1453.8930999988224,
+    [
+      {
+        "name": "Quadratic",
+        "time": 15.3524,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 1219.83,
+        "final_f": 9.59232e-13,
+        "target": 0.0,
+        "abs_err": 9.59232e-13
+      },
+      {
+        "name": "Rastrigin",
+        "time": 14.0604,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Ackley",
+        "time": 21.0182,
+        "final_f": 0.00390625,
+        "target": 0.0,
+        "abs_err": 0.00390625
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_cublas_new.exe",
+    1382.7354999957606,
+    [
+      {
+        "name": "Quadratic",
+        "time": 13.0703,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 1152.62,
+        "final_f": 9.59232e-13,
+        "target": 0.0,
+        "abs_err": 9.59232e-13
+      },
+      {
+        "name": "Rastrigin",
+        "time": 15.8604,
+        "final_f": 0.0,
+        "target": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "name": "Ackley",
+        "time": 21.0863,
+        "final_f": 0.00390625,
+        "target": 0.0,
+        "abs_err": 0.00390625
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotAtomicKernel.exe",
+    450.6769999861717,
+    [
+      {
+        "name": "Quadratic",
+        "time": 81.6999,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 174.759,
+        "final_f": 3.588241e-13,
+        "target": 0.0,
+        "abs_err": 3.588241e-13
+      },
+      {
+        "name": "Rastrigin",
+        "time": 14.758,
+        "final_f": 4139.465,
+        "target": 0.0,
+        "abs_err": 4139.465
+      },
+      {
+        "name": "Ackley",
+        "time": 38.5659,
+        "final_f": 9.244414e-05,
+        "target": 0.0,
+        "abs_err": 9.244414e-05
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotAtomicKernel.exe",
+    512.3338999983389,
+    [
+      {
+        "name": "Quadratic",
+        "time": 88.5313,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 230.805,
+        "final_f": 3.284129e-11,
+        "target": 0.0,
+        "abs_err": 3.284129e-11
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.2885,
+        "final_f": 4139.465,
+        "target": 0.0,
+        "abs_err": 4139.465
+      },
+      {
+        "name": "Ackley",
+        "time": 36.4682,
+        "final_f": 9.244414e-05,
+        "target": 0.0,
+        "abs_err": 9.244414e-05
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotAtomicKernel.exe",
+    427.3529000056442,
+    [
+      {
+        "name": "Quadratic",
+        "time": 79.6637,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 157.099,
+        "final_f": 3.156468e-08,
+        "target": 0.0,
+        "abs_err": 3.156468e-08
+      },
+      {
+        "name": "Rastrigin",
+        "time": 14.6393,
+        "final_f": 4139.465,
+        "target": 0.0,
+        "abs_err": 4139.465
+      },
+      {
+        "name": "Ackley",
+        "time": 37.4284,
+        "final_f": 9.244414e-05,
+        "target": 0.0,
+        "abs_err": 9.244414e-05
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotAtomicKernel.exe",
+    465.3413000050932,
+    [
+      {
+        "name": "Quadratic",
+        "time": 90.1022,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 185.769,
+        "final_f": 1.606182e-11,
+        "target": 0.0,
+        "abs_err": 1.606182e-11
+      },
+      {
+        "name": "Rastrigin",
+        "time": 14.6322,
+        "final_f": 4139.465,
+        "target": 0.0,
+        "abs_err": 4139.465
+      },
+      {
+        "name": "Ackley",
+        "time": 38.1274,
+        "final_f": 9.244414e-05,
+        "target": 0.0,
+        "abs_err": 9.244414e-05
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotAtomicKernel.exe",
+    439.0772999904584,
+    [
+      {
+        "name": "Quadratic",
+        "time": 86.415,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 163.526,
+        "final_f": 2.189818e-08,
+        "target": 0.0,
+        "abs_err": 2.189818e-08
+      },
+      {
+        "name": "Rastrigin",
+        "time": 14.5823,
+        "final_f": 4139.465,
+        "target": 0.0,
+        "abs_err": 4139.465
+      },
+      {
+        "name": "Ackley",
+        "time": 36.2753,
+        "final_f": 9.244414e-05,
+        "target": 0.0,
+        "abs_err": 9.244414e-05
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotAtomicKernel.exe",
+    436.0854999977164,
+    [
+      {
+        "name": "Quadratic",
+        "time": 93.2751,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 149.294,
+        "final_f": 1.974583e-09,
+        "target": 0.0,
+        "abs_err": 1.974583e-09
+      },
+      {
+        "name": "Rastrigin",
+        "time": 14.2159,
+        "final_f": 4139.465,
+        "target": 0.0,
+        "abs_err": 4139.465
+      },
+      {
+        "name": "Ackley",
+        "time": 37.7217,
+        "final_f": 9.244414e-05,
+        "target": 0.0,
+        "abs_err": 9.244414e-05
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotAtomicKernel.exe",
+    485.7312000240199,
+    [
+      {
+        "name": "Quadratic",
+        "time": 81.3805,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 211.738,
+        "final_f": 4.227732e-12,
+        "target": 0.0,
+        "abs_err": 4.227732e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 15.8607,
+        "final_f": 4139.465,
+        "target": 0.0,
+        "abs_err": 4139.465
+      },
+      {
+        "name": "Ackley",
+        "time": 40.1492,
+        "final_f": 9.244414e-05,
+        "target": 0.0,
+        "abs_err": 9.244414e-05
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotAtomicKernel.exe",
+    460.7634999847505,
+    [
+      {
+        "name": "Quadratic",
+        "time": 84.2309,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 184.763,
+        "final_f": 1.209699e-11,
+        "target": 0.0,
+        "abs_err": 1.209699e-11
+      },
+      {
+        "name": "Rastrigin",
+        "time": 15.0273,
+        "final_f": 4139.465,
+        "target": 0.0,
+        "abs_err": 4139.465
+      },
+      {
+        "name": "Ackley",
+        "time": 36.5948,
+        "final_f": 9.244414e-05,
+        "target": 0.0,
+        "abs_err": 9.244414e-05
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotAtomicKernel.exe",
+    467.9924999945797,
+    [
+      {
+        "name": "Quadratic",
+        "time": 84.4651,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 183.592,
+        "final_f": 1.805142e-11,
+        "target": 0.0,
+        "abs_err": 1.805142e-11
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.069,
+        "final_f": 4139.465,
+        "target": 0.0,
+        "abs_err": 4139.465
+      },
+      {
+        "name": "Ackley",
+        "time": 44.9265,
+        "final_f": 9.244414e-05,
+        "target": 0.0,
+        "abs_err": 9.244414e-05
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotAtomicKernel.exe",
+    484.50349998893216,
+    [
+      {
+        "name": "Quadratic",
+        "time": 78.5016,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 216.196,
+        "final_f": 1.220038e-10,
+        "target": 0.0,
+        "abs_err": 1.220038e-10
+      },
+      {
+        "name": "Rastrigin",
+        "time": 14.5946,
+        "final_f": 4139.465,
+        "target": 0.0,
+        "abs_err": 4139.465
+      },
+      {
+        "name": "Ackley",
+        "time": 35.7953,
+        "final_f": 9.244414e-05,
+        "target": 0.0,
+        "abs_err": 9.244414e-05
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotAtomicKernel.exe",
+    450.8131000038702,
+    [
+      {
+        "name": "Quadratic",
+        "time": 95.0141,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 167.658,
+        "final_f": 1.574563e-11,
+        "target": 0.0,
+        "abs_err": 1.574563e-11
+      },
+      {
+        "name": "Rastrigin",
+        "time": 14.9078,
+        "final_f": 4139.465,
+        "target": 0.0,
+        "abs_err": 4139.465
+      },
+      {
+        "name": "Ackley",
+        "time": 36.2114,
+        "final_f": 9.244414e-05,
+        "target": 0.0,
+        "abs_err": 9.244414e-05
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotAtomicKernel.exe",
+    478.0222999979742,
+    [
+      {
+        "name": "Quadratic",
+        "time": 97.4727,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 181.554,
+        "final_f": 1.087841e-11,
+        "target": 0.0,
+        "abs_err": 1.087841e-11
+      },
+      {
+        "name": "Rastrigin",
+        "time": 14.2476,
+        "final_f": 4139.465,
+        "target": 0.0,
+        "abs_err": 4139.465
+      },
+      {
+        "name": "Ackley",
+        "time": 43.9554,
+        "final_f": 9.244414e-05,
+        "target": 0.0,
+        "abs_err": 9.244414e-05
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotAtomicKernel.exe",
+    527.680600003805,
+    [
+      {
+        "name": "Quadratic",
+        "time": 94.601,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 226.773,
+        "final_f": 8.927969e-12,
+        "target": 0.0,
+        "abs_err": 8.927969e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 19.4623,
+        "final_f": 4139.465,
+        "target": 0.0,
+        "abs_err": 4139.465
+      },
+      {
+        "name": "Ackley",
+        "time": 45.2454,
+        "final_f": 9.244414e-05,
+        "target": 0.0,
+        "abs_err": 9.244414e-05
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotAtomicKernel.exe",
+    430.7876000239048,
+    [
+      {
+        "name": "Quadratic",
+        "time": 78.0735,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 157.509,
+        "final_f": 3.072388e-11,
+        "target": 0.0,
+        "abs_err": 3.072388e-11
+      },
+      {
+        "name": "Rastrigin",
+        "time": 17.2294,
+        "final_f": 4139.465,
+        "target": 0.0,
+        "abs_err": 4139.465
+      },
+      {
+        "name": "Ackley",
+        "time": 39.786,
+        "final_f": 9.244414e-05,
+        "target": 0.0,
+        "abs_err": 9.244414e-05
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotAtomicKernel.exe",
+    518.9263999927789,
+    [
+      {
+        "name": "Quadratic",
+        "time": 95.7084,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 216.208,
+        "final_f": 7.887024e-13,
+        "target": 0.0,
+        "abs_err": 7.887024e-13
+      },
+      {
+        "name": "Rastrigin",
+        "time": 18.1188,
+        "final_f": 4139.465,
+        "target": 0.0,
+        "abs_err": 4139.465
+      },
+      {
+        "name": "Ackley",
+        "time": 48.7445,
+        "final_f": 9.244414e-05,
+        "target": 0.0,
+        "abs_err": 9.244414e-05
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotAtomicKernel.exe",
+    427.37300001317635,
+    [
+      {
+        "name": "Quadratic",
+        "time": 84.6032,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 152.493,
+        "final_f": 1.77991e-12,
+        "target": 0.0,
+        "abs_err": 1.77991e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.1931,
+        "final_f": 4139.465,
+        "target": 0.0,
+        "abs_err": 4139.465
+      },
+      {
+        "name": "Ackley",
+        "time": 36.3208,
+        "final_f": 9.244414e-05,
+        "target": 0.0,
+        "abs_err": 9.244414e-05
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotAtomicKernel.exe",
+    439.03560002218,
+    [
+      {
+        "name": "Quadratic",
+        "time": 82.9479,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 160.749,
+        "final_f": 7.283061e-13,
+        "target": 0.0,
+        "abs_err": 7.283061e-13
+      },
+      {
+        "name": "Rastrigin",
+        "time": 14.529,
+        "final_f": 4139.465,
+        "target": 0.0,
+        "abs_err": 4139.465
+      },
+      {
+        "name": "Ackley",
+        "time": 43.6347,
+        "final_f": 9.244414e-05,
+        "target": 0.0,
+        "abs_err": 9.244414e-05
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotAtomicKernel.exe",
+    454.46380000794306,
+    [
+      {
+        "name": "Quadratic",
+        "time": 81.9384,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 174.954,
+        "final_f": 2.000533e-11,
+        "target": 0.0,
+        "abs_err": 2.000533e-11
+      },
+      {
+        "name": "Rastrigin",
+        "time": 14.6514,
+        "final_f": 4139.465,
+        "target": 0.0,
+        "abs_err": 4139.465
+      },
+      {
+        "name": "Ackley",
+        "time": 37.8234,
+        "final_f": 9.244414e-05,
+        "target": 0.0,
+        "abs_err": 9.244414e-05
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotAtomicKernel.exe",
+    469.618500006618,
+    [
+      {
+        "name": "Quadratic",
+        "time": 80.877,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 199.236,
+        "final_f": 2.856381e-12,
+        "target": 0.0,
+        "abs_err": 2.856381e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 14.1515,
+        "final_f": 4139.465,
+        "target": 0.0,
+        "abs_err": 4139.465
+      },
+      {
+        "name": "Ackley",
+        "time": 37.0929,
+        "final_f": 9.244414e-05,
+        "target": 0.0,
+        "abs_err": 9.244414e-05
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotAtomicKernel.exe",
+    469.01480000815354,
+    [
+      {
+        "name": "Quadratic",
+        "time": 92.9482,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 189.795,
+        "final_f": 2.497558e-12,
+        "target": 0.0,
+        "abs_err": 2.497558e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 14.4488,
+        "final_f": 4139.465,
+        "target": 0.0,
+        "abs_err": 4139.465
+      },
+      {
+        "name": "Ackley",
+        "time": 36.0621,
+        "final_f": 9.244414e-05,
+        "target": 0.0,
+        "abs_err": 9.244414e-05
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotF64Kernel.exe",
+    397.25710000493564,
+    [
+      {
+        "name": "Quadratic",
+        "time": 82.0996,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 140.555,
+        "final_f": 2.856382e-12,
+        "target": 0.0,
+        "abs_err": 2.856382e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.148,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 16.9835,
+        "final_f": 1127.451,
+        "target": 0.0,
+        "abs_err": 1127.451
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotF64Kernel.exe",
+    408.6315000022296,
+    [
+      {
+        "name": "Quadratic",
+        "time": 89.8717,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 145.08,
+        "final_f": 2.856382e-12,
+        "target": 0.0,
+        "abs_err": 2.856382e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 15.9185,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 18.1054,
+        "final_f": 1127.451,
+        "target": 0.0,
+        "abs_err": 1127.451
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotF64Kernel.exe",
+    410.1702999905683,
+    [
+      {
+        "name": "Quadratic",
+        "time": 80.5093,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 154.545,
+        "final_f": 2.856382e-12,
+        "target": 0.0,
+        "abs_err": 2.856382e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 19.7092,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 15.7628,
+        "final_f": 1127.451,
+        "target": 0.0,
+        "abs_err": 1127.451
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotF64Kernel.exe",
+    407.3179000115488,
+    [
+      {
+        "name": "Quadratic",
+        "time": 80.7705,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 154.449,
+        "final_f": 2.856382e-12,
+        "target": 0.0,
+        "abs_err": 2.856382e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.7332,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 16.5918,
+        "final_f": 1127.451,
+        "target": 0.0,
+        "abs_err": 1127.451
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotF64Kernel.exe",
+    417.47419998864643,
+    [
+      {
+        "name": "Quadratic",
+        "time": 83.5696,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 160.185,
+        "final_f": 2.856382e-12,
+        "target": 0.0,
+        "abs_err": 2.856382e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.3018,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 15.693,
+        "final_f": 1127.451,
+        "target": 0.0,
+        "abs_err": 1127.451
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotF64Kernel.exe",
+    384.63689998025075,
+    [
+      {
+        "name": "Quadratic",
+        "time": 78.1635,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 133.048,
+        "final_f": 2.856382e-12,
+        "target": 0.0,
+        "abs_err": 2.856382e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 19.5091,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 15.6648,
+        "final_f": 1127.451,
+        "target": 0.0,
+        "abs_err": 1127.451
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotF64Kernel.exe",
+    428.5581999865826,
+    [
+      {
+        "name": "Quadratic",
+        "time": 85.6177,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 170.325,
+        "final_f": 2.856382e-12,
+        "target": 0.0,
+        "abs_err": 2.856382e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.1531,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 17.0882,
+        "final_f": 1127.451,
+        "target": 0.0,
+        "abs_err": 1127.451
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotF64Kernel.exe",
+    407.6553999911994,
+    [
+      {
+        "name": "Quadratic",
+        "time": 76.5915,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 157.796,
+        "final_f": 2.856382e-12,
+        "target": 0.0,
+        "abs_err": 2.856382e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 19.8223,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 15.4963,
+        "final_f": 1127.451,
+        "target": 0.0,
+        "abs_err": 1127.451
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotF64Kernel.exe",
+    415.1347999868449,
+    [
+      {
+        "name": "Quadratic",
+        "time": 91.9174,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 145.168,
+        "final_f": 2.856382e-12,
+        "target": 0.0,
+        "abs_err": 2.856382e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 17.526,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 16.6683,
+        "final_f": 1127.451,
+        "target": 0.0,
+        "abs_err": 1127.451
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotF64Kernel.exe",
+    419.8945999960415,
+    [
+      {
+        "name": "Quadratic",
+        "time": 90.5081,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 155.405,
+        "final_f": 2.856382e-12,
+        "target": 0.0,
+        "abs_err": 2.856382e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 17.7956,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 17.682,
+        "final_f": 1127.451,
+        "target": 0.0,
+        "abs_err": 1127.451
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotF64Kernel.exe",
+    428.9463000022806,
+    [
+      {
+        "name": "Quadratic",
+        "time": 82.0938,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 171.13,
+        "final_f": 2.856382e-12,
+        "target": 0.0,
+        "abs_err": 2.856382e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 19.2617,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 15.3475,
+        "final_f": 1127.451,
+        "target": 0.0,
+        "abs_err": 1127.451
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotF64Kernel.exe",
+    428.83530000108294,
+    [
+      {
+        "name": "Quadratic",
+        "time": 91.0008,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 156.965,
+        "final_f": 2.856382e-12,
+        "target": 0.0,
+        "abs_err": 2.856382e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 19.685,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 18.2582,
+        "final_f": 1127.451,
+        "target": 0.0,
+        "abs_err": 1127.451
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotF64Kernel.exe",
+    400.5673000065144,
+    [
+      {
+        "name": "Quadratic",
+        "time": 82.5055,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 151.762,
+        "final_f": 2.856382e-12,
+        "target": 0.0,
+        "abs_err": 2.856382e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 17.0161,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 15.5446,
+        "final_f": 1127.451,
+        "target": 0.0,
+        "abs_err": 1127.451
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotF64Kernel.exe",
+    412.7792999788653,
+    [
+      {
+        "name": "Quadratic",
+        "time": 91.6517,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 152.858,
+        "final_f": 2.856382e-12,
+        "target": 0.0,
+        "abs_err": 2.856382e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.145,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 16.2644,
+        "final_f": 1127.451,
+        "target": 0.0,
+        "abs_err": 1127.451
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotF64Kernel.exe",
+    479.40410001319833,
+    [
+      {
+        "name": "Quadratic",
+        "time": 96.0209,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 199.497,
+        "final_f": 2.856382e-12,
+        "target": 0.0,
+        "abs_err": 2.856382e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 19.4718,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 20.6957,
+        "final_f": 1127.451,
+        "target": 0.0,
+        "abs_err": 1127.451
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotF64Kernel.exe",
+    432.1207999892067,
+    [
+      {
+        "name": "Quadratic",
+        "time": 93.7946,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 151.453,
+        "final_f": 2.856382e-12,
+        "target": 0.0,
+        "abs_err": 2.856382e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.3601,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 15.5849,
+        "final_f": 1127.451,
+        "target": 0.0,
+        "abs_err": 1127.451
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotF64Kernel.exe",
+    408.275900001172,
+    [
+      {
+        "name": "Quadratic",
+        "time": 79.3345,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 154.994,
+        "final_f": 2.856382e-12,
+        "target": 0.0,
+        "abs_err": 2.856382e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.167,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 16.291,
+        "final_f": 1127.451,
+        "target": 0.0,
+        "abs_err": 1127.451
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotF64Kernel.exe",
+    401.45099998335354,
+    [
+      {
+        "name": "Quadratic",
+        "time": 79.2164,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 149.916,
+        "final_f": 2.856382e-12,
+        "target": 0.0,
+        "abs_err": 2.856382e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.1556,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 15.6837,
+        "final_f": 1127.451,
+        "target": 0.0,
+        "abs_err": 1127.451
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotF64Kernel.exe",
+    415.52589999628253,
+    [
+      {
+        "name": "Quadratic",
+        "time": 79.5212,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 161.24,
+        "final_f": 2.856382e-12,
+        "target": 0.0,
+        "abs_err": 2.856382e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 17.8404,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 16.2602,
+        "final_f": 1127.451,
+        "target": 0.0,
+        "abs_err": 1127.451
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotF64Kernel.exe",
+    453.83149999543093,
+    [
+      {
+        "name": "Quadratic",
+        "time": 94.0655,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 191.96,
+        "final_f": 2.856382e-12,
+        "target": 0.0,
+        "abs_err": 2.856382e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.7433,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 15.7615,
+        "final_f": 1127.451,
+        "target": 0.0,
+        "abs_err": 1127.451
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotKernel.exe",
+    468.00160000566393,
+    [
+      {
+        "name": "Quadratic",
+        "time": 83.2108,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 198.63,
+        "final_f": 3.140593e-12,
+        "target": 0.0,
+        "abs_err": 3.140593e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.859,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 28.1473,
+        "final_f": 0.0002215468,
+        "target": 0.0,
+        "abs_err": 0.0002215468
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotKernel.exe",
+    434.1493000101764,
+    [
+      {
+        "name": "Quadratic",
+        "time": 80.6123,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 168.937,
+        "final_f": 3.140593e-12,
+        "target": 0.0,
+        "abs_err": 3.140593e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.2046,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 28.2473,
+        "final_f": 0.0002215468,
+        "target": 0.0,
+        "abs_err": 0.0002215468
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotKernel.exe",
+    459.4132999773137,
+    [
+      {
+        "name": "Quadratic",
+        "time": 80.2691,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 188.406,
+        "final_f": 3.140593e-12,
+        "target": 0.0,
+        "abs_err": 3.140593e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.2131,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 30.5247,
+        "final_f": 0.0002215468,
+        "target": 0.0,
+        "abs_err": 0.0002215468
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotKernel.exe",
+    471.8083000043407,
+    [
+      {
+        "name": "Quadratic",
+        "time": 88.9318,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 195.129,
+        "final_f": 3.140593e-12,
+        "target": 0.0,
+        "abs_err": 3.140593e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.0103,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 27.9896,
+        "final_f": 0.0002215468,
+        "target": 0.0,
+        "abs_err": 0.0002215468
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotKernel.exe",
+    469.2362000059802,
+    [
+      {
+        "name": "Quadratic",
+        "time": 97.3977,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 176.358,
+        "final_f": 3.140593e-12,
+        "target": 0.0,
+        "abs_err": 3.140593e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 18.1689,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 38.4064,
+        "final_f": 0.0002215468,
+        "target": 0.0,
+        "abs_err": 0.0002215468
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotKernel.exe",
+    460.43909998843446,
+    [
+      {
+        "name": "Quadratic",
+        "time": 84.4938,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 191.844,
+        "final_f": 3.140593e-12,
+        "target": 0.0,
+        "abs_err": 3.140593e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.6739,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 29.0606,
+        "final_f": 0.0002215468,
+        "target": 0.0,
+        "abs_err": 0.0002215468
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotKernel.exe",
+    451.82309998199344,
+    [
+      {
+        "name": "Quadratic",
+        "time": 93.1157,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 172.024,
+        "final_f": 3.140593e-12,
+        "target": 0.0,
+        "abs_err": 3.140593e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.607,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 28.0645,
+        "final_f": 0.0002215468,
+        "target": 0.0,
+        "abs_err": 0.0002215468
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotKernel.exe",
+    480.4777999815997,
+    [
+      {
+        "name": "Quadratic",
+        "time": 99.7436,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 191.915,
+        "final_f": 3.140593e-12,
+        "target": 0.0,
+        "abs_err": 3.140593e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 20.0821,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 28.7364,
+        "final_f": 0.0002215468,
+        "target": 0.0,
+        "abs_err": 0.0002215468
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotKernel.exe",
+    463.28510000603274,
+    [
+      {
+        "name": "Quadratic",
+        "time": 88.2364,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 183.86,
+        "final_f": 3.140593e-12,
+        "target": 0.0,
+        "abs_err": 3.140593e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 18.8055,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 29.7968,
+        "final_f": 0.0002215468,
+        "target": 0.0,
+        "abs_err": 0.0002215468
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotKernel.exe",
+    465.1011000096332,
+    [
+      {
+        "name": "Quadratic",
+        "time": 92.5813,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 189.499,
+        "final_f": 3.140593e-12,
+        "target": 0.0,
+        "abs_err": 3.140593e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.3322,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 28.838,
+        "final_f": 0.0002215468,
+        "target": 0.0,
+        "abs_err": 0.0002215468
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotKernel.exe",
+    465.3033000067808,
+    [
+      {
+        "name": "Quadratic",
+        "time": 104.084,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 178.367,
+        "final_f": 3.140593e-12,
+        "target": 0.0,
+        "abs_err": 3.140593e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.555,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 28.9601,
+        "final_f": 0.0002215468,
+        "target": 0.0,
+        "abs_err": 0.0002215468
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotKernel.exe",
+    476.7083000042476,
+    [
+      {
+        "name": "Quadratic",
+        "time": 84.0057,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 209.443,
+        "final_f": 3.140593e-12,
+        "target": 0.0,
+        "abs_err": 3.140593e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.575,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 29.3646,
+        "final_f": 0.0002215468,
+        "target": 0.0,
+        "abs_err": 0.0002215468
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotKernel.exe",
+    452.16770001570694,
+    [
+      {
+        "name": "Quadratic",
+        "time": 83.1914,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 185.382,
+        "final_f": 3.140593e-12,
+        "target": 0.0,
+        "abs_err": 3.140593e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 17.2235,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 28.4618,
+        "final_f": 0.0002215468,
+        "target": 0.0,
+        "abs_err": 0.0002215468
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotKernel.exe",
+    463.89970000018366,
+    [
+      {
+        "name": "Quadratic",
+        "time": 82.9418,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 195.609,
+        "final_f": 3.140593e-12,
+        "target": 0.0,
+        "abs_err": 3.140593e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.2516,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 33.2093,
+        "final_f": 0.0002215468,
+        "target": 0.0,
+        "abs_err": 0.0002215468
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotKernel.exe",
+    455.28389999526553,
+    [
+      {
+        "name": "Quadratic",
+        "time": 88.4303,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 166.271,
+        "final_f": 3.140593e-12,
+        "target": 0.0,
+        "abs_err": 3.140593e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 21.8419,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 40.566,
+        "final_f": 0.0002215468,
+        "target": 0.0,
+        "abs_err": 0.0002215468
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotKernel.exe",
+    453.59179997467436,
+    [
+      {
+        "name": "Quadratic",
+        "time": 89.3597,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 182.262,
+        "final_f": 3.140593e-12,
+        "target": 0.0,
+        "abs_err": 3.140593e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.2832,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 28.2154,
+        "final_f": 0.0002215468,
+        "target": 0.0,
+        "abs_err": 0.0002215468
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotKernel.exe",
+    461.09530000831,
+    [
+      {
+        "name": "Quadratic",
+        "time": 79.8604,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 190.997,
+        "final_f": 3.140593e-12,
+        "target": 0.0,
+        "abs_err": 3.140593e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 18.0885,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 33.4512,
+        "final_f": 0.0002215468,
+        "target": 0.0,
+        "abs_err": 0.0002215468
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotKernel.exe",
+    443.03490000311285,
+    [
+      {
+        "name": "Quadratic",
+        "time": 90.0239,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 161.174,
+        "final_f": 3.140593e-12,
+        "target": 0.0,
+        "abs_err": 3.140593e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 21.1847,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 29.8968,
+        "final_f": 0.0002215468,
+        "target": 0.0,
+        "abs_err": 0.0002215468
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotKernel.exe",
+    451.2695999874268,
+    [
+      {
+        "name": "Quadratic",
+        "time": 78.2332,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 180.189,
+        "final_f": 3.140593e-12,
+        "target": 0.0,
+        "abs_err": 3.140593e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 17.1903,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 34.0926,
+        "final_f": 0.0002215468,
+        "target": 0.0,
+        "abs_err": 0.0002215468
+      }
+    ]
+  ],
+  [
+    ".\\lbfgs_dotKernel.exe",
+    413.8576999830548,
+    [
+      {
+        "name": "Quadratic",
+        "time": 76.2198,
+        "final_f": 2.473306e-13,
+        "target": 0.0,
+        "abs_err": 2.473306e-13
+      },
+      {
+        "name": "Rosenbrock",
+        "time": 156.984,
+        "final_f": 3.140593e-12,
+        "target": 0.0,
+        "abs_err": 3.140593e-12
+      },
+      {
+        "name": "Rastrigin",
+        "time": 16.8624,
+        "final_f": 4081.18,
+        "target": 0.0,
+        "abs_err": 4081.18
+      },
+      {
+        "name": "Ackley",
+        "time": 28.2032,
+        "final_f": 0.0002215468,
+        "target": 0.0,
+        "abs_err": 0.0002215468
+      }
+    ]
+  ]
+]
