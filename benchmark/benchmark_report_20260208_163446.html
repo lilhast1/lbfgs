@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Benchmark Performance Report</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    h1 {
+      color: #333;
+      border-bottom: 3px solid #4CAF50;
+      padding-bottom: 10px;
+    }
+    h2 {
+      color: #555;
+      margin-top: 30px;
+    }
+    .summary-section {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 30px;
+    }
+    .test-section {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+      vertical-align: top;
+    }
+    th {
+      background: #4CAF50;
+      color: white;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 12px;
+      letter-spacing: 0.5px;
+      position: sticky;
+      top: 0;
+    }
+    tr:hover {
+      background: #f9f9f9;
+    }
+    .metric {
+      font-size: 14px;
+      color: #666;
+    }
+    .timestamp {
+      color: #888;
+      font-size: 14px;
+    }
+    code {
+      background: #eee;
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
+    .muted {
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+  <h1>Benchmark Performance Report</h1>
+  <p class="timestamp">Generated: 2026-02-08 16:40:42</p>
+
+  <div class="summary-section">
+    <h2>Executables Compared (Single Run)</h2>
+    <p class="metric">The benchmark compares the following executables in one run:</p>
+    <ul>
+      <li><code>lbfgs_cublas_N4096.exe</code> <span class="muted">(impl=cublas, N=4096)</span></li>
+      <li><code>lbfgs_dotF64Kernel_N4096.exe</code> <span class="muted">(impl=dotF64Kernel, N=4096)</span></li>
+      <li><code>lbfgs_cublas_N65536.exe</code> <span class="muted">(impl=cublas, N=65536)</span></li>
+      <li><code>lbfgs_dotF64Kernel_N65536.exe</code> <span class="muted">(impl=dotF64Kernel, N=65536)</span></li>
+      <li><code>lbfgs_cublas_N1048576.exe</code> <span class="muted">(impl=cublas, N=1048576)</span></li>
+      <li><code>lbfgs_dotF64Kernel_N1048576.exe</code> <span class="muted">(impl=dotF64Kernel, N=1048576)</span></li>
+      <li><code>lbfgs_cublas_N16777216.exe</code> <span class="muted">(impl=cublas, N=16777216)</span></li>
+      <li><code>lbfgs_dotF64Kernel_N16777216.exe</code> <span class="muted">(impl=dotF64Kernel, N=16777216)</span></li>
+    </ul>
+  </div>
+
+  <h2>Dimension Summary (Avg Time by N)</h2>
+
+  <div class="test-section">
+    <h3>Ackley — Avg Time by N</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>N</th>
+          <th>cublas Avg (ms)</th>
+          <th>dotF64Kernel Avg (ms)</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <tr>
+          <td><strong>4096</strong></td>
+          <td>43.242</td>
+          <td>16.004</td>
+        </tr>
+
+        <tr>
+          <td><strong>65536</strong></td>
+          <td>69.470</td>
+          <td>19.743</td>
+        </tr>
+
+        <tr>
+          <td><strong>1048576</strong></td>
+          <td>213.609</td>
+          <td>85.237</td>
+        </tr>
+
+        <tr>
+          <td><strong>16777216</strong></td>
+          <td>4413.456</td>
+          <td>1132.937</td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <div class="test-section">
+    <h3>Quadratic — Avg Time by N</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>N</th>
+          <th>cublas Avg (ms)</th>
+          <th>dotF64Kernel Avg (ms)</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <tr>
+          <td><strong>4096</strong></td>
+          <td>14.169</td>
+          <td>103.021</td>
+        </tr>
+
+        <tr>
+          <td><strong>65536</strong></td>
+          <td>14.658</td>
+          <td>97.554</td>
+        </tr>
+
+        <tr>
+          <td><strong>1048576</strong></td>
+          <td>21.448</td>
+          <td>282.579</td>
+        </tr>
+
+        <tr>
+          <td><strong>16777216</strong></td>
+          <td>136.204</td>
+          <td>3076.031</td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <div class="test-section">
+    <h3>Rastrigin — Avg Time by N</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>N</th>
+          <th>cublas Avg (ms)</th>
+          <th>dotF64Kernel Avg (ms)</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <tr>
+          <td><strong>4096</strong></td>
+          <td>68.677</td>
+          <td>17.595</td>
+        </tr>
+
+        <tr>
+          <td><strong>65536</strong></td>
+          <td>19.533</td>
+          <td>19.228</td>
+        </tr>
+
+        <tr>
+          <td><strong>1048576</strong></td>
+          <td>147.469</td>
+          <td>65.947</td>
+        </tr>
+
+        <tr>
+          <td><strong>16777216</strong></td>
+          <td>1190.111</td>
+          <td>821.929</td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <div class="test-section">
+    <h3>Rosenbrock — Avg Time by N</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>N</th>
+          <th>cublas Avg (ms)</th>
+          <th>dotF64Kernel Avg (ms)</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <tr>
+          <td><strong>4096</strong></td>
+          <td>25.610</td>
+          <td>143.262</td>
+        </tr>
+
+        <tr>
+          <td><strong>65536</strong></td>
+          <td>1.937</td>
+          <td>305.614</td>
+        </tr>
+
+        <tr>
+          <td><strong>1048576</strong></td>
+          <td>7.434</td>
+          <td>1590.923</td>
+        </tr>
+
+        <tr>
+          <td><strong>16777216</strong></td>
+          <td>96.550</td>
+          <td>8046.819</td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Per Test Case Performance (Detailed)</h2>
+
+  <div class="test-section">
+    <h3>Ackley</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Executable</th>
+          <th>Impl</th>
+          <th>N</th>
+          <th>Avg Time (ms)</th>
+          <th>Median (ms)</th>
+          <th>Samples</th>
+          <th>Avg |F - Target|</th>
+          <th>Median |F - Target|</th>
+          <th>Avg Final F</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <tr>
+          <td><strong>lbfgs_cublas_N4096.exe</strong></td>
+          <td>cublas</td>
+          <td>4096</td>
+          <td>43.242</td>
+          <td>39.879</td>
+          <td>10</td>
+          <td>6.451e+04</td>
+          <td>6.451e+04</td>
+          <td>6.451e+04</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_dotF64Kernel_N4096.exe</strong></td>
+          <td>dotF64Kernel</td>
+          <td>4096</td>
+          <td>16.004</td>
+          <td>15.801</td>
+          <td>10</td>
+          <td>1.127e+03</td>
+          <td>1.127e+03</td>
+          <td>1.127e+03</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_cublas_N65536.exe</strong></td>
+          <td>cublas</td>
+          <td>65536</td>
+          <td>69.470</td>
+          <td>69.583</td>
+          <td>10</td>
+          <td>1.032e+06</td>
+          <td>1.032e+06</td>
+          <td>1.032e+06</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_dotF64Kernel_N65536.exe</strong></td>
+          <td>dotF64Kernel</td>
+          <td>65536</td>
+          <td>19.743</td>
+          <td>19.486</td>
+          <td>10</td>
+          <td>1.804e+04</td>
+          <td>1.804e+04</td>
+          <td>1.804e+04</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_cublas_N1048576.exe</strong></td>
+          <td>cublas</td>
+          <td>1048576</td>
+          <td>213.609</td>
+          <td>211.715</td>
+          <td>10</td>
+          <td>1.500e+07</td>
+          <td>1.500e+07</td>
+          <td>1.500e+07</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_dotF64Kernel_N1048576.exe</strong></td>
+          <td>dotF64Kernel</td>
+          <td>1048576</td>
+          <td>85.237</td>
+          <td>85.128</td>
+          <td>10</td>
+          <td>2.886e+05</td>
+          <td>2.886e+05</td>
+          <td>2.886e+05</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_cublas_N16777216.exe</strong></td>
+          <td>cublas</td>
+          <td>16777216</td>
+          <td>4413.456</td>
+          <td>4411.490</td>
+          <td>10</td>
+          <td>2.400e+08</td>
+          <td>2.400e+08</td>
+          <td>2.400e+08</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_dotF64Kernel_N16777216.exe</strong></td>
+          <td>dotF64Kernel</td>
+          <td>16777216</td>
+          <td>1132.937</td>
+          <td>1132.830</td>
+          <td>10</td>
+          <td>4.620e+06</td>
+          <td>4.620e+06</td>
+          <td>4.620e+06</td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <div class="test-section">
+    <h3>Quadratic</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Executable</th>
+          <th>Impl</th>
+          <th>N</th>
+          <th>Avg Time (ms)</th>
+          <th>Median (ms)</th>
+          <th>Samples</th>
+          <th>Avg |F - Target|</th>
+          <th>Median |F - Target|</th>
+          <th>Avg Final F</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <tr>
+          <td><strong>lbfgs_cublas_N4096.exe</strong></td>
+          <td>cublas</td>
+          <td>4096</td>
+          <td>14.169</td>
+          <td>14.118</td>
+          <td>10</td>
+          <td>0.000e+00</td>
+          <td>0.000e+00</td>
+          <td>0.000e+00</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_dotF64Kernel_N4096.exe</strong></td>
+          <td>dotF64Kernel</td>
+          <td>4096</td>
+          <td>103.021</td>
+          <td>104.888</td>
+          <td>10</td>
+          <td>2.473e-13</td>
+          <td>2.473e-13</td>
+          <td>2.473e-13</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_cublas_N65536.exe</strong></td>
+          <td>cublas</td>
+          <td>65536</td>
+          <td>14.658</td>
+          <td>14.391</td>
+          <td>10</td>
+          <td>0.000e+00</td>
+          <td>0.000e+00</td>
+          <td>0.000e+00</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_dotF64Kernel_N65536.exe</strong></td>
+          <td>dotF64Kernel</td>
+          <td>65536</td>
+          <td>97.554</td>
+          <td>97.220</td>
+          <td>10</td>
+          <td>1.740e-13</td>
+          <td>1.740e-13</td>
+          <td>1.740e-13</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_cublas_N1048576.exe</strong></td>
+          <td>cublas</td>
+          <td>1048576</td>
+          <td>21.448</td>
+          <td>21.355</td>
+          <td>10</td>
+          <td>0.000e+00</td>
+          <td>0.000e+00</td>
+          <td>0.000e+00</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_dotF64Kernel_N1048576.exe</strong></td>
+          <td>dotF64Kernel</td>
+          <td>1048576</td>
+          <td>282.579</td>
+          <td>284.011</td>
+          <td>10</td>
+          <td>1.914e-13</td>
+          <td>1.914e-13</td>
+          <td>1.914e-13</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_cublas_N16777216.exe</strong></td>
+          <td>cublas</td>
+          <td>16777216</td>
+          <td>136.204</td>
+          <td>135.799</td>
+          <td>10</td>
+          <td>0.000e+00</td>
+          <td>0.000e+00</td>
+          <td>0.000e+00</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_dotF64Kernel_N16777216.exe</strong></td>
+          <td>dotF64Kernel</td>
+          <td>16777216</td>
+          <td>3076.031</td>
+          <td>3076.105</td>
+          <td>10</td>
+          <td>2.105e-13</td>
+          <td>2.105e-13</td>
+          <td>2.105e-13</td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <div class="test-section">
+    <h3>Rastrigin</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Executable</th>
+          <th>Impl</th>
+          <th>N</th>
+          <th>Avg Time (ms)</th>
+          <th>Median (ms)</th>
+          <th>Samples</th>
+          <th>Avg |F - Target|</th>
+          <th>Median |F - Target|</th>
+          <th>Avg Final F</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <tr>
+          <td><strong>lbfgs_cublas_N4096.exe</strong></td>
+          <td>cublas</td>
+          <td>4096</td>
+          <td>68.677</td>
+          <td>62.888</td>
+          <td>10</td>
+          <td>2.546e+06</td>
+          <td>2.546e+06</td>
+          <td>2.546e+06</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_dotF64Kernel_N4096.exe</strong></td>
+          <td>dotF64Kernel</td>
+          <td>4096</td>
+          <td>17.595</td>
+          <td>16.843</td>
+          <td>10</td>
+          <td>4.081e+03</td>
+          <td>4.081e+03</td>
+          <td>4.081e+03</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_cublas_N65536.exe</strong></td>
+          <td>cublas</td>
+          <td>65536</td>
+          <td>19.533</td>
+          <td>17.776</td>
+          <td>10</td>
+          <td>3.155e+07</td>
+          <td>3.155e+07</td>
+          <td>3.155e+07</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_dotF64Kernel_N65536.exe</strong></td>
+          <td>dotF64Kernel</td>
+          <td>65536</td>
+          <td>19.228</td>
+          <td>18.263</td>
+          <td>10</td>
+          <td>6.530e+04</td>
+          <td>6.530e+04</td>
+          <td>6.530e+04</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_cublas_N1048576.exe</strong></td>
+          <td>cublas</td>
+          <td>1048576</td>
+          <td>147.469</td>
+          <td>144.451</td>
+          <td>10</td>
+          <td>5.048e+08</td>
+          <td>5.048e+08</td>
+          <td>5.048e+08</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_dotF64Kernel_N1048576.exe</strong></td>
+          <td>dotF64Kernel</td>
+          <td>1048576</td>
+          <td>65.947</td>
+          <td>66.018</td>
+          <td>10</td>
+          <td>1.045e+06</td>
+          <td>1.045e+06</td>
+          <td>1.045e+06</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_cublas_N16777216.exe</strong></td>
+          <td>cublas</td>
+          <td>16777216</td>
+          <td>1190.111</td>
+          <td>1190.120</td>
+          <td>10</td>
+          <td>8.077e+09</td>
+          <td>8.077e+09</td>
+          <td>8.077e+09</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_dotF64Kernel_N16777216.exe</strong></td>
+          <td>dotF64Kernel</td>
+          <td>16777216</td>
+          <td>821.929</td>
+          <td>820.084</td>
+          <td>10</td>
+          <td>1.677e+07</td>
+          <td>1.677e+07</td>
+          <td>1.677e+07</td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <div class="test-section">
+    <h3>Rosenbrock</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Executable</th>
+          <th>Impl</th>
+          <th>N</th>
+          <th>Avg Time (ms)</th>
+          <th>Median (ms)</th>
+          <th>Samples</th>
+          <th>Avg |F - Target|</th>
+          <th>Median |F - Target|</th>
+          <th>Avg Final F</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <tr>
+          <td><strong>lbfgs_cublas_N4096.exe</strong></td>
+          <td>cublas</td>
+          <td>4096</td>
+          <td>25.610</td>
+          <td>23.193</td>
+          <td>10</td>
+          <td>1.497e+32</td>
+          <td>1.497e+32</td>
+          <td>1.497e+32</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_dotF64Kernel_N4096.exe</strong></td>
+          <td>dotF64Kernel</td>
+          <td>4096</td>
+          <td>143.262</td>
+          <td>137.133</td>
+          <td>10</td>
+          <td>2.856e-12</td>
+          <td>2.856e-12</td>
+          <td>2.856e-12</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_cublas_N65536.exe</strong></td>
+          <td>cublas</td>
+          <td>65536</td>
+          <td>1.937</td>
+          <td>1.928</td>
+          <td>10</td>
+          <td>1.864e+25</td>
+          <td>1.864e+25</td>
+          <td>1.864e+25</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_dotF64Kernel_N65536.exe</strong></td>
+          <td>dotF64Kernel</td>
+          <td>65536</td>
+          <td>305.614</td>
+          <td>304.195</td>
+          <td>10</td>
+          <td>2.540e-11</td>
+          <td>2.540e-11</td>
+          <td>2.540e-11</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_cublas_N1048576.exe</strong></td>
+          <td>cublas</td>
+          <td>1048576</td>
+          <td>7.434</td>
+          <td>7.373</td>
+          <td>10</td>
+          <td>2.982e+26</td>
+          <td>2.982e+26</td>
+          <td>2.982e+26</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_dotF64Kernel_N1048576.exe</strong></td>
+          <td>dotF64Kernel</td>
+          <td>1048576</td>
+          <td>1590.923</td>
+          <td>1591.090</td>
+          <td>10</td>
+          <td>1.492e-12</td>
+          <td>1.492e-12</td>
+          <td>1.492e-12</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_cublas_N16777216.exe</strong></td>
+          <td>cublas</td>
+          <td>16777216</td>
+          <td>96.550</td>
+          <td>96.400</td>
+          <td>10</td>
+          <td>4.771e+27</td>
+          <td>4.771e+27</td>
+          <td>4.771e+27</td>
+        </tr>
+
+        <tr>
+          <td><strong>lbfgs_dotF64Kernel_N16777216.exe</strong></td>
+          <td>dotF64Kernel</td>
+          <td>16777216</td>
+          <td>8046.819</td>
+          <td>8047.405</td>
+          <td>10</td>
+          <td>5.775e+00</td>
+          <td>5.775e+00</td>
+          <td>5.775e+00</td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+</body>
+</html>

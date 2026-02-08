@@ -476,7 +476,7 @@ struct Quadratic {
 int main() {
     using T = float;
     
-    int N = 1 << 12;  // Problem size
+    int N = 1 << 24;  // Problem size
     int M = 10;       // History size
     T* x0 = new T[N];
 

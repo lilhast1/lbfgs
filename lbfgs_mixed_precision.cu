@@ -312,7 +312,7 @@ double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps = 1e-
 int main(int argc, char* argv[]) {
     using T = float;
     
-    int N = 1 << 12;  // Problem size
+    int N = 1 << 24;  // Problem size
     int M = 10;       // History size
     T* x0 = new T[N];
 
@@ -344,7 +344,7 @@ int main(int argc, char* argv[]) {
     printf("Starting: Rosenbrock...\n");
 
     cudaEventRecord(startEvent);
-    final_f = lbfgs(N, M, x0, 500, rosen, 1e-6f);
+    final_f = lbfgs(N, M, x0, 2000, rosen, 1e-6f);
     cudaEventRecord(stopEvent);
 
     cudaEventSynchronize(stopEvent);
