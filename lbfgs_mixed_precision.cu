@@ -84,7 +84,7 @@ struct KernelConfig {
 template <typename T>
 __global__ void dotProduct(const T* a, const T* b, T* c, int n);
 
-__global__ void dotAtomic(const float* a, const float* b, float* out, int n)
+__global__ void dotAtomic(const float* a, const float* b, float* out, int n);
 
 __global__ void dotF64Reduction(const float* a, const float* b, double* partial, int n);
 
@@ -308,7 +308,7 @@ double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps = 1e-
 int main(int argc, char* argv[]) {
     using T = float;
     
-    int N = 1 << 24;  // Problem size
+    int N = 1 << 12;  // Problem size
     int M = 10;       // History size
     T* x0 = new T[N];
 
