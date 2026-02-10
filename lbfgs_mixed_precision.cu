@@ -81,10 +81,12 @@ struct KernelConfig {
 
 /*----------------------------------------KERNELI (Prototipi)----------------------------------------*/
 
-// CUDA kernel. Each thread takes care of one element of c, each thread block preforms reduction
-
 template <typename T>
 __global__ void dotProduct(const T* a, const T* b, T* c, int n);
+
+__global__ void dotAtomic(const float* a, const float* b, float* out, int n)
+
+__global__ void dotF64Reduction(const float* a, const float* b, double* partial, int n);
 
 template <typename T>
 __global__ void setVectorScalar(T* r, const T* q, T factor, int n);
@@ -93,14 +95,7 @@ template <typename T>
 __global__ void axpy(T alpha, const T* x, T* y, int n);
 
 template <typename T>
-__global__ void mulVecScal(T alpha, const T* x, T* y, int n);
-
-template <typename T>
 __global__ void sum_reduction_kernel(const T* input, T* output, int n);
-
-template <typename T>
-__global__ void dot_partial_f32_to_f64(const float* a, const float* b, double* partial, int n);
-
 
 /*----------------------------------------Testovi---------------------------------------------------*/
 
@@ -309,6 +304,7 @@ double dot(const T* a, const T* b, int n, DotLookupTable<T>* context = nullptr);
 template <typename Func, typename T>
 double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps = 1e-9);
 
+/*------------------------------------------ Main -----------------------------------------------------*/
 int main(int argc, char* argv[]) {
     using T = float;
     
@@ -410,13 +406,6 @@ int main(int argc, char* argv[]) {
 
 /*----------------------------------------KERNELI (Implementacije)-----------------------------------*/
 
-template <typename T>
-__global__ void mulVecScal(T alpha, const T* x, T* y, int n) {
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
-    if (i < n)
-        y[i] += alpha * x[i];
-}
-
 // y = y + alpha * x
 template <typename T>
 __global__ void axpy(T alpha, const T* x, T* y, int n) {
@@ -477,7 +466,7 @@ __global__ void dotProduct(const T* a, const T* b, T* c, int n) {
 // dodaje u globalnu sumu (sporije, weirdly, mada 
 // na enterprise GPUs može biti brže zbog boljeg
 // hardwarea za atomics)
-__global__ void dot_atomic_f32(const float* a, const float* b, float* out, int n) {
+__global__ void dotAtomic(const float* a, const float* b, float* out, int n) {
     float sum = 0.0f;
     for (int i = blockIdx.x * blockDim.x + threadIdx.x; i < n; i += blockDim.x * gridDim.x)
         sum += a[i] * b[i];
@@ -492,6 +481,22 @@ __global__ void dot_atomic_f32(const float* a, const float* b, float* out, int n
         __syncthreads();
     }
     if (threadIdx.x == 0) atomicAdd(out, buf[0]);
+}
+
+__global__ void dotF64Reduction(const float* a, const float* b, double* partial, int n) {
+    __shared__ double buf[256];
+    double sum = 0.0;
+    for (int i = blockIdx.x * blockDim.x + threadIdx.x; i < n; i += blockDim.x * gridDim.x)
+        sum += (double)a[i] * (double)b[i];
+
+    buf[threadIdx.x] = sum;
+    __syncthreads();
+
+    for (int s = blockDim.x / 2; s > 0; s >>= 1) {
+        if (threadIdx.x < s) buf[threadIdx.x] += buf[threadIdx.x + s];
+        __syncthreads();
+    }
+    if (threadIdx.x == 0) partial[blockIdx.x] = buf[0];
 }
 
 // Redukcijski kernel za sumu
@@ -522,21 +527,6 @@ __global__ void sum_reduction_kernel(const T* input, T* output, int n) {
 //
 // Numerički najstabilniji način za float vektore, ali DALEKO
 // najsporiji.
-__global__ void dot_partial_f32_to_f64(const float* a, const float* b, double* partial, int n) {
-    __shared__ double buf[256];
-    double sum = 0.0;
-    for (int i = blockIdx.x * blockDim.x + threadIdx.x; i < n; i += blockDim.x * gridDim.x)
-        sum += (double)a[i] * (double)b[i];
-
-    buf[threadIdx.x] = sum;
-    __syncthreads();
-
-    for (int s = blockDim.x / 2; s > 0; s >>= 1) {
-        if (threadIdx.x < s) buf[threadIdx.x] += buf[threadIdx.x + s];
-        __syncthreads();
-    }
-    if (threadIdx.x == 0) partial[blockIdx.x] = buf[0];
-}
 
 /*----------------------------------------Wrapperfje---------------------------------------------------*/
 
@@ -599,11 +589,11 @@ double dot(const T* a, const T* b, int n, DotLookupTable<T>* context) {
 
 //  Trash code, trebao raditi brže ali ne isplati se zbog malo VRAM-a (malo N)
 //  i slabe podrške za atomic na slabijim karticama
-inline float dot_f32(const float* a, const float* b, int n, KernelConfig cfg) {
+inline float dotAtomicGPU(const float* a, const float* b, int n, KernelConfig cfg) {
     static float* d_out = nullptr;
     if (!d_out) cudaMalloc(&d_out, sizeof(float));
     cudaMemset(d_out, 0, sizeof(float));
-    dot_atomic_f32<<<cfg.gridSize, 256>>>(a, b, d_out, n);
+    dotAtomic<<<cfg.gridSize, 256>>>(a, b, d_out, n);
     float h;
     cudaMemcpy(&h, d_out, sizeof(float), cudaMemcpyDeviceToHost);
     return h;
@@ -611,7 +601,7 @@ inline float dot_f32(const float* a, const float* b, int n, KernelConfig cfg) {
 
 
 // Numerički najstabilniji ali i najsporiji način za float vektore
-double dot_f32_accum_f64(const float* a, const float* b, int n, const KernelConfig& cfg) {
+double dotF64Accum(const float* a, const float* b, int n, const KernelConfig& cfg) {
     static double* d_partial = nullptr;
     static double* h_partial = nullptr;
     static int cap = 0;
@@ -627,7 +617,7 @@ double dot_f32_accum_f64(const float* a, const float* b, int n, const KernelConf
         cap = blocks;
     }
 
-    dot_partial_f32_to_f64<<<blocks, 256>>>(a, b, d_partial, n);
+    dotF64Reduction<<<blocks, 256>>>(a, b, d_partial, n);
     cudaMemcpy(h_partial, d_partial, blocks * sizeof(double), cudaMemcpyDeviceToHost);
 
     double s = 0.0;
@@ -678,7 +668,7 @@ double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps) {
 
     for (int k = 0; k < max_itr; k++) {
         // gradient norm
-        double g_norm = std::sqrt(dot_f32_accum_f64(g.elems, g.elems, n, cfg));
+        double g_norm = std::sqrt(dotF64Accum(g.elems, g.elems, n, cfg));
         if (g_norm < eps) break;
 
         // 1) Compute search direction d
@@ -700,7 +690,7 @@ double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps) {
                 // if rho[idx]==0, pair is inactive; skip
                 if (rho[idx] == (T)0) { alpha_hist[idx] = (T)0; continue; }
 
-                double s_dot_q = dot_f32_accum_f64(S.elems + idx * n, q.elems, n, cfg);
+                double s_dot_q = dotF64Accum(S.elems + idx * n, q.elems, n, cfg);
                 alpha_hist[idx] = (T)(rho[idx] * (T)s_dot_q);
 
                 axpy<T><<<cfg.gridSize, cfg.blockSize>>>((T)(-alpha_hist[idx]),
@@ -715,8 +705,8 @@ double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps) {
 
             double gamma = 1.0;
             if (rho[last_idx] != (T)0) {
-                double s_dot_y = dot_f32_accum_f64(S.elems + last_idx * n, Y.elems + last_idx * n, n, cfg);
-                double y_dot_y = dot_f32_accum_f64(Y.elems + last_idx * n, Y.elems + last_idx * n, n, cfg);
+                double s_dot_y = dotF64Accum(S.elems + last_idx * n, Y.elems + last_idx * n, n, cfg);
+                double y_dot_y = dotF64Accum(Y.elems + last_idx * n, Y.elems + last_idx * n, n, cfg);
                 gamma = (y_dot_y > 1e-18) ? (s_dot_y / y_dot_y) : 1.0;
             }
 
@@ -730,7 +720,7 @@ double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps) {
 
                 if (rho[idx] == (T)0) continue;
 
-                double y_dot_r = dot_f32_accum_f64(Y.elems + idx * n, r.elems, n, cfg);
+                double y_dot_r = dotF64Accum(Y.elems + idx * n, r.elems, n, cfg);
                 double beta = (double)rho[idx] * y_dot_r;
 
                 axpy<T><<<cfg.gridSize, cfg.blockSize>>>((T)(alpha_hist[idx] - (T)beta),
@@ -744,7 +734,7 @@ double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps) {
         }
 
         // 2) Backtracking line search (GPU f(x))
-        double g_dot_d = dot_f32_accum_f64(g.elems, d.elems, n, cfg);
+        double g_dot_d = dotF64Accum(g.elems, d.elems, n, cfg);
 
         // If not a descent direction, restart to steepest descent
         if (g_dot_d >= 0.0) {
@@ -753,7 +743,7 @@ double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps) {
             for (int i = 0; i < m; ++i) rho[i] = (T)0;
             setVectorScalar<T><<<cfg.gridSize, cfg.blockSize>>>(d.elems, g.elems, (T)-1, n);
             CUDA_CHECK(cudaGetLastError());
-            g_dot_d = dot_f32_accum_f64(g.elems, d.elems, n, cfg);
+            g_dot_d = dotF64Accum(g.elems, d.elems, n, cfg);
         }
 
         const double c1 = 1e-4;
@@ -857,7 +847,7 @@ double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps) {
         axpy<T><<<cfg.gridSize, cfg.blockSize>>>((T)-1, g_old.elems, Y.elems + cur * n, n);
         CUDA_CHECK(cudaGetLastError());
 
-        double sy = dot_f32_accum_f64(S.elems + cur * n, Y.elems + cur * n, n, cfg);
+        double sy = dotF64Accum(S.elems + cur * n, Y.elems + cur * n, n, cfg);
 
         if (sy > 1e-12) {
             rho[cur] = (T)(1.0 / sy);
