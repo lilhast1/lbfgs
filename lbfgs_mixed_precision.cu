@@ -163,6 +163,7 @@ __global__ void dotProduct(const T* a, const T* b, T* c, int n);
  * @param b Second input vector on the device.
  * @param out Output scalar value on the device.
  * @param n Size of the input vectors.
+ * @return void
  */
 __global__ void dotAtomic(const float* a, const float* b, float* out, int n)
 
@@ -181,31 +182,61 @@ __global__ void dotAtomic(const float* a, const float* b, float* out, int n)
 __global__ void dotF64Reduction(const float* a, const float* b, double* partial, int n);
 
 /**
- * @brief Kernel for computing the sum of elements in an array using a reduction
-   approach. Each block computes a partial sum of a portion of the input array, 
-   and the results are accumulated into a single output value using atomic
-   addition. 
+ * @brief Kernel for performing the operation r = factor * q, where r and q  are
+   vectors on the device. 
  * 
- * @tparam T The floating-point type (e.g., float or double) used for the input 
- *          elements and the output sum.
+ * @tparam T The floating-point type (e.g., float or double) used.
  * @param r Output array on the device where the result will be stored.
  * @param q Input array on the device.
  * @param factor Scalar value to multiply each element of q by.
  * @param n Size of the input arrays.
- * @return __global__ 
+ * @return void 
  */
 template <typename T>
 __global__ void setVectorScalar(T* r, const T* q, T factor, int n);
 
+/**
+ * @brief Kernel for performing the AXPY operation: y = y + alpha * x, 
+ * where x and y are vectors on the device and alpha is a scalar.
+ * 
+ * @tparam T The floating point type to be used 
+ * @param alpha Value of the scalar multiplier.
+ * @param x Input vector on the device.
+ * @param y Input/output vector on the device. On input, it contains the 
+ * original values; on output, it is updated with the result of the AXPY 
+ * operation. 
+ * @param n Size of the input vectors.
+ * @return void 
+ */
 template <typename T>
 __global__ void axpy(T alpha, const T* x, T* y, int n);
 
+/**
+ * @brief Kernel for performing a reduction to compute the sum of elements in an
+   input array.
+ * 
+ * @tparam T Floating point type to be used for the reduction.
+ * @param input Input vector on the device containing the elements to be summed.
+ * @param output Result vector on the device where the final sum will be stored. 
+ * @param n Size of the input vector.
+ * @return void 
+ */
 template <typename T>
 __global__ void sum_reduction_kernel(const T* input, T* output, int n);
 
 /*----------------------------------------Testovi---------------------------------------------------*/
 
-// Kernel za računanje f(x) = x^2 i g(x) = 2x
+/**
+ * @brief Test kernel for computing the quadratic function f(x) = sum(x_i^2) and
+   its gradient g_i = 2 * x_i.
+ * 
+ * @tparam T Floating point type to be used for the computatiions 
+ * @param x Input vector on the device.
+ * @param f_vals Output vector on the device where function values are stored.
+ * @param g Output vector on the device where gradient values are stored.
+ * @param n Size of the input vectors.
+ * @return __global__ 
+ */
 template <typename T>
 __global__ void quad_kernel(const T* x, T* f_vals, T* g, int n) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -216,7 +247,13 @@ __global__ void quad_kernel(const T* x, T* f_vals, T* g, int n) {
     }
 }
 
-// Test: kvadratna funkcija - wrapper oko kernela iznad
+/**
+ * @brief Wrapper for the quadratic test, providing methods to compute the function 
+ * value and gradient for a given input vector. Manages temporary GPU memory for 
+ * storing intermediate results during the computations.
+ * 
+ * @tparam T Floating point type to be used for the computations.
+ */
 template <typename T>
 struct QuadraticTest {
     T* d_temp_f;
@@ -240,7 +277,17 @@ struct QuadraticTest {
     }
 };
 
-// Kernel za računanje Rosenbrockove funkcije i njenog gradijenta
+/**
+ * @brief Test kernel for computing the Rosenbrock function 
+ * f(x) = sum(100 * (x_{i+1} - x_i^2)^2 + (1 - x_i)^2) and its gradient.
+ * 
+ * @tparam T Floating point type to be used for the computations 
+ * @param x Input vector on the device.
+ * @param f_vals Output vector on the device where function values are stored.
+ * @param g Output vector on the device where gradient values are stored.
+ * @param n Size of the input vectors.
+ * @return void 
+ */
 template <typename T>
 __global__ void rosen_kernel(const T* x, T* f_vals, T* g, int n) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -261,7 +308,18 @@ __global__ void rosen_kernel(const T* x, T* f_vals, T* g, int n) {
     }
 }
 
-// No-atom version (for testing)
+/**
+ * @brief Non-atomic version of the Rosenbrock kernel. Computes the same
+   function and gradiend as the rosen_kernel but without using atomic
+   operations.
+ * 
+ * @tparam T Floating point type to be used for the computations
+ * @param x Input vector on the device.
+ * @param f_vals Output vector on the device where function values are stored.
+ * @param g Output vector on the device where gradient values are stored.
+ * @param n Size of the input vectors.
+ * @return void 
+ */
 template <typename T>
 __global__ void rosen_fg_kernel_noatom(const T* x, T* f_vals, T* g, int n) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -301,7 +359,13 @@ __global__ void rosen_fg_kernel_noatom(const T* x, T* f_vals, T* g, int n) {
     }
 }
 
-// Wrapper za Rosenbrock test
+/**
+ * @brief Wrapper for the Rosenbrock test, providing methods to compute the function 
+ * value and gradient for a given input vector. Manages temporary GPU memory for 
+ * storing intermediate results during the computations.
+ * 
+ * @tparam T Floating point type to be used for the computations.
+ */
 template <typename T>
 struct RosenbrockTest {
     T* d_temp_f;
@@ -319,7 +383,13 @@ struct RosenbrockTest {
     }
 };
 
-// Wrapper za not-atomic Rosenbrock test
+/**
+ * @brief Wrapper for the non-atomic Rosenbrock test, providing methods to
+   compute the function value and gradient for a given input vector. Manages 
+   temporary GPU memory forstoring intermediate results during the computations.
+ * 
+ * @tparam T Floating point type to be used for the computations.
+ */
 template <typename T>
 struct RosenbrockNoAtomTest {
     T* d_temp_f;
@@ -330,7 +400,7 @@ struct RosenbrockNoAtomTest {
         cudaMemset(d_temp_f, 0, n * sizeof(T));
         int blocks = (n + BLOCK_SIZE - 1) / BLOCK_SIZE;
         rosen_fg_kernel_noatom<<<blocks, BLOCK_SIZE>>>(d_x, d_temp_f, (T*)nullptr, n);
-        return gpu_sum(d_temp_f, n); // sum only [0..n-2] meaningful; fine if last is 0
+        return gpu_sum(d_temp_f, n);
     }
 
     void df(T* d_x, T* d_g, int n) {
@@ -340,7 +410,18 @@ struct RosenbrockNoAtomTest {
 
 };
 
-// Kernel za računanje Rastriginove funkcije i njenog gradijenta
+/**
+ * @brief Kernel for computing the Rastrigin function 
+ * f(x) = 10 * n + sum(x_i^2 - 10 * cos(2 * pi * x_i)) and its gradient 
+ * g_i = 2 * x_i + 20 * pi * sin(2 * pi * x_i).
+ * 
+ * @tparam T Floating point type to be used for the computations
+ * @param x Input vector on the device.
+ * @param f_vals Output vector on the device where function values are stored.
+ * @param g Output vector on the device where gradient values are stored.
+ * @param n Size of the input vectors.
+ * @return void 
+ */
 template <typename T>
 __global__ void rastrigin_kernel(const T* x, T* f_vals, T* g, int n) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -353,7 +434,13 @@ __global__ void rastrigin_kernel(const T* x, T* f_vals, T* g, int n) {
     }
 }
 
-// Wrapper za Rastrigin test
+/**
+ * @brief Wrapper for the Rastrigin test, providing methods to compute the function 
+ * value and gradient for a given input vector. Manages temporary GPU memory for 
+ * storing intermediate results during the computations.
+ * 
+ * @tparam T Floating point type to be used for the computations.
+ */
 template <typename T>
 struct RastriginTest {
     T* d_temp_f;
@@ -370,7 +457,18 @@ struct RastriginTest {
     }
 };
 
-// Kernel za računanje Ackleyjeve funkcije i njenog gradijenta
+/**
+ * @brief Kernel for computing the Ackley function 
+ * f(x) = -20 * exp(-0.2 * sqrt(1/n * sum(x_i^2))) - exp(1/n * sum(cos(2 * pi * x_i))) + 20 + e
+ * and its gradient g_i = 4 * x_i * exp(-0.2 * sqrt(1/n * sum(x_i^2))) / sqrt(1/n * sum(x_i^2)) + 
+ * 2 * pi * sin(2 * pi * x_i) * exp(1/n * sum(cos(2 * pi * x_i))).
+ * @tparam T Floating point type to be used for the computations
+ * @param x Input vector on the device.
+ * @param f_vals Output vector on the device where function values are stored.
+ * @param g Output vector on the device where gradient values are stored.
+ * @param n Size of the input vectors.
+ * @return void 
+ */
 template <typename T>
 __global__ void ackley_kernel(const T* x, T* f_vals, T* g, int n) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -385,7 +483,13 @@ __global__ void ackley_kernel(const T* x, T* f_vals, T* g, int n) {
             g[i] = (T)4.0 * xi * exp(-0.2 * r) / r + 2.0 * M_PI * sin(2.0 * M_PI * xi) * exp(cos(2.0 * M_PI * xi));    }
 }
 
-// Wrapper za Ackley test
+/**
+ * @brief Wrapper for the Ackley test. Provides methods to compute the function
+   value and gradient for a given input vector. Manages temporary GPU memory for
+   storing intermediate results during the computations.
+ * 
+ * @tparam T Floating point type to be used for the computations.
+ */
 template <typename T>
 struct AckleyTest {
     T* d_temp_f;
@@ -404,13 +508,52 @@ struct AckleyTest {
 
 /*----------------------------------------Wrapper fje---------------------------------------------------*/
 
-// neka su vektori a i b na gpu alocirani vraca a . b
+/**
+ * @brief Wrapper for the dotProduct kernel. Performs the dot product of two
+   vectors on the GPU and returns the result as a double. The final dot
+   product is accumulated in double precision for improved numerical stability,
+   but the intermediate results as well as the input vectors are kept in the
+   specified type T.
+ * 
+ * @tparam T Floating point type to be used for the input vectors. 
+ * @param a First input vector on the device.
+ * @param b Second input vector on the device.
+ * @param n Size of the input vectors.
+ * @param context Helper structure to manage partial results for the dot product
+   kernel.
+ * @return double 
+ */
 template <typename T>
 double dot(const T* a, const T* b, int n, DotLookupTable<T>* context = nullptr);
+
+/**
+ * @brief The main L-BFGS optimization function. Performs the L-BFGS
+   optimization algorithm on the GPU for a given goal function and its gradient. 
+ * 
+ * @tparam Func The goal function type, which should provide methods to compute
+   the function value and gradient for a given input vector.
+ * @tparam T Floating point type to be used for the optimization computations. 
+ * @param n Dimension of the input vector
+ * @param m Number of history steps to use in the L-BFGS algorithm.
+ * @param x0 Initial optimal vector on the device.
+ * @param max_itr Specifies the maximum number of iterations to perform.
+ * @param func The goal function to be optimized.
+ * @param eps The convergence threshold for the optimization. The algorithm will stop when the
+   norm of the gradient is less than this value.
+ * @return double 
+ */
 template <typename Func, typename T>
 double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps = 1e-9);
 
 /*------------------------------------------ Main -----------------------------------------------------*/
+/**
+ * @brief Main function to test the L-BFGS optimization algorithm on various
+   benchmark functions. 
+ * 
+ * @param argc none
+ * @param argv none
+ * @return int 
+ */
 int main(int argc, char* argv[]) {
     using T = float;
     
@@ -528,8 +671,7 @@ __global__ void setVectorScalar(T* r, const T* q, T factor, int n) {
     }
 }
 
-// The way to go for dot product
-// svaki blok kopira parcijalnu sumu, na hostu se redukuje
+// Each block computes a partial sum of the products, which are then reduced on the host.
 template <typename T>
 __global__ void dotProduct(const T* a, const T* b, T* c, int n) {
     // Get global thread ID
@@ -566,12 +708,10 @@ __global__ void dotProduct(const T* a, const T* b, T* c, int n) {
     }
 }
 
-// Trash kernel for dot product using atomicAdd 
-//
-// Svaki thread računa svoj dio i onda atomically 
-// dodaje u globalnu sumu (sporije, weirdly, mada 
-// na enterprise GPUs može biti brže zbog boljeg
-// hardwarea za atomics)
+// Each thread computes its portion of the dot product, then block-wise reduces
+// in shared memory, and finally the block's contribution is added to the output
+// using atomicAdd. Numerically less stable and slower. HPC GPU potentially
+// could do better with this approach.
 __global__ void dotAtomic(const float* a, const float* b, float* out, int n) {
     float sum = 0.0f;
     for (int i = blockIdx.x * blockDim.x + threadIdx.x; i < n; i += blockDim.x * gridDim.x)
@@ -589,6 +729,12 @@ __global__ void dotAtomic(const float* a, const float* b, float* out, int n) {
     if (threadIdx.x == 0) atomicAdd(out, buf[0]);
 }
 
+// Each thread computes its portion of the dot product, accumulates in double
+// precision for better numerical stability, then block-wise reduces in shared
+// memory and finally the block's contribution is added to the output array. The
+// final reduction of the block contributions is done on the host. Numerically
+// most stable and fastest way for float vectors, due to high FP64 throughput on
+// modern GPU and CPU platforms. 
 __global__ void dotF64Reduction(const float* a, const float* b, double* partial, int n) {
     __shared__ double buf[256];
     double sum = 0.0;
@@ -605,7 +751,6 @@ __global__ void dotF64Reduction(const float* a, const float* b, double* partial,
     if (threadIdx.x == 0) partial[blockIdx.x] = buf[0];
 }
 
-// Redukcijski kernel za sumu
 template <typename T>
 __global__ void sum_reduction_kernel(const T* input, T* output, int n) {
     __shared__ T sdata[BLOCK_SIZE];
@@ -625,18 +770,8 @@ __global__ void sum_reduction_kernel(const T* input, T* output, int n) {
         atomicAdd(output, sdata[0]);
 }
 
-// Dot product kernel za float vektore s akumulacijom u double
-//
-// Svaki thread računa svoj dio i onda block-wise redukuje
-// u double preciznosti. Parcijalne sume se vraćaju na host
-// gdje se finalno redukuje u double preciznosti.
-//
-// Numerički najstabilniji način za float vektore, ali DALEKO
-// najsporiji.
-
 /*----------------------------------------Wrapperfje---------------------------------------------------*/
 
-// Helper to get sum of a device array 
 template <typename T>
 double gpu_sum(T* d_elements, int n) {
     static T* d_res = nullptr;
@@ -652,7 +787,6 @@ double gpu_sum(T* d_elements, int n) {
     return (double)h_res;
 }
 
-// The way to go for dot product
 template <typename T>
 double dot(const T* a, const T* b, int n, DotLookupTable<T>* context) {
     dim3 blockSize = BLOCK_SIZE;
@@ -693,8 +827,16 @@ double dot(const T* a, const T* b, int n, DotLookupTable<T>* context) {
     return result;
 }
 
-//  Trash code, trebao raditi brže ali ne isplati se zbog malo VRAM-a (malo N)
-//  i slabe podrške za atomic na slabijim karticama
+/**
+ * @brief Wrapper function that calls the dotAtomic kernel to compute the dot
+   product of two float vectors on the GPU. 
+ * 
+ * @param a First input vector on the device.
+ * @param b Second input vector on the device.
+ * @param n Size of the input vectors.
+ * @param cfg Kernel configuration specifying grid and block sizes for the kernel launch.
+ * @return float 
+ */
 inline float dotAtomicGPU(const float* a, const float* b, int n, KernelConfig cfg) {
     static float* d_out = nullptr;
     if (!d_out) cudaMalloc(&d_out, sizeof(float));
@@ -705,8 +847,18 @@ inline float dotAtomicGPU(const float* a, const float* b, int n, KernelConfig cf
     return h;
 }
 
-
-// Numerički najstabilniji ali i najsporiji način za float vektore
+/**
+ * @brief Wrapper function that calls the dotF64Reduction kernel to compute the dot product
+   of two float vectors on the GPU, accumulating the results in double precision
+   for improved numerical stability. The final reduction of the block contributions
+   is performed on the host.
+ * 
+ * @param a First input vector on the device.
+ * @param b Second input vector on the device.
+ * @param n Size of the input vectors.
+ * @param cfg Kernel configuration specifying grid and block sizes for the kernel launch.
+ * @return double 
+ */
 double dotF64Accum(const float* a, const float* b, int n, const KernelConfig& cfg) {
     static double* d_partial = nullptr;
     static double* h_partial = nullptr;
@@ -744,7 +896,7 @@ double dotF64Accum(const float* a, const float* b, int n, const KernelConfig& cf
 } while(0)
 #endif
 
-// L-BFGS algoritam, in all its flashy glory :D
+// L-BFGS algorithm, in all its flashy glory :D
 template <typename Func, typename T>
 double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps) {
     UnifiedVector<T> x(n), g(n);
