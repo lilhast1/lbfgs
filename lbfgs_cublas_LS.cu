@@ -1,5 +1,14 @@
-// lbfgs_cublas_fixed.cu
-// nvcc -O3 -lineinfo lbfgs_cublas_fixed.cu -lcublas -o lbfgs_cublas_fixed.exe
+/**
+ * @file tmp_main.cu
+ * @brief L-BFGS implementation using cuBLAS for vector operations and small CUDA kernels.
+ *
+ * This file contains small device kernels and host wrappers used to exercise
+ * an L-BFGS implementation that relies on cuBLAS for vector operations and
+ * custom CUDA kernels for simple elementwise operations and test functions.
+ *
+ * The style of Doxygen comments mirrors that used in `lbfgs_mixed_precision.cu`.
+ * @date 2026-02-11
+ */
 
 #include <cublas_v2.h>
 #include <cuda_runtime.h>
@@ -20,7 +29,6 @@
 
 #define BLOCK_SIZE 256
 
-// -------------------- Error checking --------------------
 #ifndef CUDA_CHECK
 #define CUDA_CHECK(call)                                                          \
     do {                                                                          \
@@ -45,7 +53,19 @@
     } while (0)
 #endif
 
-// -------------------- Simple kernels --------------------
+/*------------------------------------------- KERNELS -------------------------------------------*/
+
+/**
+ * @brief Compute L-BFGS history vectors s = x_new - x_old and y = g_new - g_old.
+ *
+ * @param n Number of elements.
+ * @param s Device pointer where s will be written.
+ * @param y Device pointer where y will be written.
+ * @param x_new Device pointer to the new iterate.
+ * @param x_old Device pointer to the previous iterate.
+ * @param g_new Device pointer to the new gradient.
+ * @param g_old Device pointer to the previous gradient.
+ */
 __global__ void compute_sy_kernel(int n, float* s, float* y,
                                   const float* x_new, const float* x_old,
                                   const float* g_new, const float* g_old) {
@@ -56,12 +76,29 @@ __global__ void compute_sy_kernel(int n, float* s, float* y,
     }
 }
 
+/**
+ * @brief Fill an array with ones on the device.
+ *
+ * Used as a reusable buffer for computing sums via cuBLAS dot products.
+ *
+ * @param a Device array to fill with ones.
+ * @param n Number of elements.
+ */
 __global__ void fill_ones(float* a, int n) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i < n) a[i] = 1.0f;
 }
 
-// Optional: NaN/Inf guard for debugging
+/**
+ * @brief Count NaN/Inf elements in an array (debugging helper).
+ *
+ * Writes the number of non-finite entries into `out` using a block-wise
+ * reduction followed by an atomicAdd.
+ *
+ * @param a Input device array.
+ * @param n Number of elements.
+ * @param out Device pointer to integer accumulator (must be initialized to 0).
+ */
 __global__ void count_nan_inf(const float* a, int n, int* out) {
     __shared__ int sh[256];
     int tid = threadIdx.x;
@@ -80,7 +117,19 @@ __global__ void count_nan_inf(const float* a, int n, int* out) {
     if (tid == 0) atomicAdd(out, sh[0]);
 }
 
-// -------------------- cuBLAS helpers --------------------
+/*----------------------------------------- WRAPPERS ------------------------------------------*/
+
+/**
+ * @brief Reusable cuBLAS helper to compute the sum of a device float vector.
+ *
+ * Internally allocates and reuses a device buffer of ones (`d_ones`) and
+ * performs a dot product to compute the sum efficiently via cuBLAS.
+ *
+ * @param h cuBLAS handle.
+ * @param d_v Device pointer to input vector.
+ * @param n Number of elements.
+ * @return float Sum of elements in `d_v`.
+ */
 static float* d_ones = nullptr;
 static int ones_cap = 0;
 
@@ -100,6 +149,18 @@ static float gpu_sum_f32_cublas(cublasHandle_t h, const float* d_v, int n) {
 }
 
 // -------------------- Test functions (f and df on GPU) --------------------
+/**
+ * @brief Kernel computing quadratic function contributions and gradient.
+ *
+ * f_i = x_i^2 and g_i = 2*x_i. Per-element contributions are written to
+ * `f_vals` (if non-null) to allow device-side accumulation via cuBLAS.
+ *
+ * @tparam T Floating point type.
+ * @param x Input device vector.
+ * @param f_vals Per-element function contributions (optional).
+ * @param g Gradient output (optional).
+ * @param n Number of elements.
+ */
 template <typename T>
 __global__ void quad_kernel(const T* x, T* f_vals, T* g, int n) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -110,6 +171,14 @@ __global__ void quad_kernel(const T* x, T* f_vals, T* g, int n) {
     }
 }
 
+/**
+ * @brief Wrapper for the quadratic test function used by the optimizer.
+ *
+ * Allocates temporary device storage for per-element function contributions
+ * and exposes `f` and `df` methods compatible with the optimizer.
+ *
+ * @tparam T Floating point type used on device.
+ */
 template <typename T>
 struct QuadraticTest {
     T* d_temp_f = nullptr;
@@ -136,7 +205,19 @@ struct QuadraticTest {
         CUDA_CHECK(cudaDeviceSynchronize());
     }
 };
-// No-atomic Rosenbrock: compute f_vals[i] for i=0..n-2 and g[i] for i=0..n-1
+/**
+ * @brief Non-atomic Rosenbrock kernel variant.
+ *
+ * Computes per-element contributions for the Rosenbrock function and a
+ * non-overlapping gradient without atomics. The kernel writes `f_vals` for
+ * indices 0..n-2 and `g` for indices 0..n-1 as a replacement for the atomic
+ * version when suitable.
+ *
+ * @param x Input device vector.
+ * @param f_vals Output per-element function contributions (optional).
+ * @param g Output gradient vector (optional).
+ * @param n Number of elements.
+ */
 __global__ void rosen_f_g_noatom(const float* x, float* f_vals, float* g, int n) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -180,6 +261,14 @@ __global__ void rosen_f_g_noatom(const float* x, float* f_vals, float* g, int n)
     }
 }
 
+/**
+ * @brief Wrapper for the non-atomic Rosenbrock test.
+ *
+ * Executes the `rosen_f_g_noatom` kernel and reduces per-element function
+ * contributions via cuBLAS when needed.
+ *
+ * @tparam T Floating point type used on device.
+ */
 template <typename T>
 struct RosenbrockNoAtomTest {
     T* d_temp_f;
@@ -211,6 +300,17 @@ struct RosenbrockNoAtomTest {
     }
 };
 
+/**
+ * @brief Kernel computing Rastrigin function contributions and gradient.
+ *
+ * f_i = x_i^2 - 10*cos(2*pi*x_i), and global function value is 10*n + sum(f_i).
+ *
+ * @tparam T Floating point type.
+ * @param x Input device vector.
+ * @param f_vals Per-element function contributions (optional).
+ * @param g Gradient output (optional).
+ * @param n Number of elements.
+ */
 template <typename T>
 __global__ void rastrigin_kernel(const T* x, T* f_vals, T* g, int n) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -223,6 +323,14 @@ __global__ void rastrigin_kernel(const T* x, T* f_vals, T* g, int n) {
     }
 }
 
+/**
+ * @brief Wrapper for the Rastrigin test function.
+ *
+ * Executes the device kernel and reduces per-element function values using
+ * cuBLAS to produce the global function value.
+ *
+ * @tparam T Floating point type.
+ */
 template <typename T>
 struct RastriginTest {
     T* d_temp_f = nullptr;
@@ -250,6 +358,19 @@ struct RastriginTest {
     }
 };
 
+/**
+ * @brief Kernel computing Ackley function contributions and gradient.
+ *
+ * Per-element outputs are written to `f_vals` and `g` when those pointers are
+ * provided. The implementation uses a stabilized derivative for the radial
+ * term to avoid dividing by zero.
+ *
+ * @tparam T Floating point type.
+ * @param x Input device vector.
+ * @param f_vals Per-element function contributions (optional).
+ * @param g Gradient output (optional).
+ * @param n Number of elements.
+ */
 template <typename T>
 __global__ void ackley_kernel(const T* x, T* f_vals, T* g, int n) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -282,6 +403,14 @@ __global__ void ackley_kernel(const T* x, T* f_vals, T* g, int n) {
     }
 }
 
+/**
+ * @brief Wrapper for the Ackley test function.
+ *
+ * Executes the `ackley_kernel` and reduces per-element contributions via
+ * cuBLAS to produce the scalar objective value.
+ *
+ * @tparam T Floating point type.
+ */
 template <typename T>
 struct AckleyTest {
     T* d_temp_f = nullptr;
@@ -309,7 +438,15 @@ struct AckleyTest {
     }
 };
 
-// -------------------- L-BFGS (cuBLAS vector ops + GPU f/df) --------------------
+/*----------------------------------------- L-BFGS -----------------------------------------*/
+
+/**
+ * @brief L-BFGS optimizer that uses cuBLAS for vector operations and evaluates
+ * objective/gradient on the GPU via the provided `Func` wrapper.
+ *
+ * The `Func` type must provide `set_handle(cublasHandle_t*)`, `f(d_x,n)`, and
+ * `df(d_x,d_g,n)` methods so the optimizer can call into GPU-based functions.
+ */
 template <typename Func>
 class lbfgs {
     float* d_x = nullptr;
@@ -327,6 +464,12 @@ class lbfgs {
 
     cublasHandle_t handle{};
 
+    /**
+     * @brief Allocate device memory and initialize cuBLAS handle.
+     *
+     * @param n Problem dimension.
+     * @param m L-BFGS history size.
+     */
     void init(std::size_t n, std::size_t m) {
         CUBLAS_CHECK(cublasCreate(&handle));
         CUBLAS_CHECK(cublasSetPointerMode(handle, CUBLAS_POINTER_MODE_HOST));
@@ -346,6 +489,9 @@ class lbfgs {
         for (std::size_t i = 0; i < m; ++i) { rho[i] = 0.0f; alpha_hist[i] = 0.0f; }
     }
 
+    /**
+     * @brief Free device memory and destroy cuBLAS handle.
+     */
     void destroy() {
         if (d_x) {
             CUDA_CHECK(cudaDeviceSynchronize());
@@ -400,6 +546,17 @@ class lbfgs {
     }
 
 public:
+    /**
+     * @brief Run the L-BFGS optimization loop.
+     *
+     * @param problem_size Dimensionality `n`.
+     * @param memory_size History `m`.
+     * @param x0 Host pointer to initial guess; optimized solution is written back.
+     * @param max_itr Maximum iterations.
+     * @param func Objective wrapper implementing `f` and `df`.
+     * @param eps Convergence tolerance for gradient norm.
+     * @return double Final objective value.
+     */
     double operator()(std::size_t problem_size, std::size_t memory_size, float* x0,
                       std::size_t max_itr, Func& func, float eps = 1e-9f) {
 
@@ -626,7 +783,15 @@ public:
     }
 };
 
-// -------------------- Main --------------------
+/*------------------------------------------ Main ------------------------------------------*/
+
+/**
+ * @brief Program entry: runs several benchmark tests (Quadratic, Rosenbrock,
+ * Rastrigin, Ackley) using the L-BFGS harness and reports timing and final values.
+ *
+ * Initializes problem vectors, runs the optimizer for each test, and prints
+ * results to stdout.
+ */
 int main() {
     using T = float;
 
