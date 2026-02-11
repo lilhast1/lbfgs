@@ -27,16 +27,7 @@
 
 #define BLOCK_SIZE 256
 
-/**
- * @brief Computes the sum of elements in a GPU array.
- * 
- * @param d_elements The GPU array of elements to sum.
- * @param n The number of elements in the array.
- * @return double The computed sum.
- */
-double gpu_sum(double* d_elements, int n);
-
-/*----------------------------------------Datatypes---------------------------------------------------*/
+/*------------------------------------------ Data types ------------------------------------------*/
 
 /**
  * @brief A simple matrix wrapper allocated on the GPU. Manages its own memory and provides basic
@@ -138,7 +129,7 @@ struct KernelConfig {
     }
 };
 
-/*----------------------------------------KERNELI (Prototipi)----------------------------------------*/
+/*------------------------------------------- KERNELS -------------------------------------------*/
 /**
  * @brief Kernel for computing the dot product of two vectors. Each block
    computes a partial sum of the products. The final reduction is performed on
@@ -224,7 +215,7 @@ __global__ void axpy(T alpha, const T* x, T* y, int n);
 template <typename T>
 __global__ void sum_reduction_kernel(const T* input, T* output, int n);
 
-/*----------------------------------------Testovi---------------------------------------------------*/
+/*-------------------------------------------- Tests ---------------------------------------------*/
 
 /**
  * @brief Test kernel for computing the quadratic function f(x) = sum(x_i^2) and
@@ -506,7 +497,16 @@ struct AckleyTest {
     }
 };
 
-/*----------------------------------------Wrapper fje---------------------------------------------------*/
+/*------------------------------------------- WRAPPERS --------------------------------------------*/
+
+/**
+ * @brief Computes the sum of elements in a GPU array.
+ * 
+ * @param d_elements The GPU array of elements to sum.
+ * @param n The number of elements in the array.
+ * @return double The computed sum.
+ */
+double gpu_sum(double* d_elements, int n);
 
 /**
  * @brief Wrapper for the dotProduct kernel. Performs the dot product of two
@@ -545,7 +545,7 @@ double dot(const T* a, const T* b, int n, DotLookupTable<T>* context = nullptr);
 template <typename Func, typename T>
 double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps = 1e-9);
 
-/*------------------------------------------ Main -----------------------------------------------------*/
+/*---------------------------------------------- Main ---------------------------------------------*/
 /**
  * @brief Main function to test the L-BFGS optimization algorithm on various
    benchmark functions. 
@@ -653,7 +653,7 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-/*----------------------------------------KERNELI (Implementacije)-----------------------------------*/
+/*---------------------------------- KERNELS (Implementations) -----------------------------------*/
 
 // y = y + alpha * x
 template <typename T>
@@ -770,7 +770,7 @@ __global__ void sum_reduction_kernel(const T* input, T* output, int n) {
         atomicAdd(output, sdata[0]);
 }
 
-/*----------------------------------------Wrapperfje---------------------------------------------------*/
+/*---------------------------------- WRAPPERS (Implementations) -----------------------------------*/
 
 template <typename T>
 double gpu_sum(T* d_elements, int n) {
