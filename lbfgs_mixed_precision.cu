@@ -883,8 +883,8 @@ double dotF64Accum(const float* a, const float* b, int n, const KernelConfig& cf
     return s;
 }
 
-// Macro za provjeru CUDA errora, 
-// koristi se kao: CUDA_CHECK( cudaMalloc( ... ) );
+// Macro for checking CUDA errors,
+// used as: CUDA_CHECK( cudaMalloc( ... ) );
 #ifndef CUDA_CHECK
 #define CUDA_CHECK(call) do {                                  \
   cudaError_t _e = (call);                                     \
