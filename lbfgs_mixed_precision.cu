@@ -1,3 +1,16 @@
+/**
+ * @file lbfgs_mixed_precision.cu
+ * @author Tarik Hastor (thastor1@etf.unsa.ba), Ismar Muslić (imuslic1@etf.unsa.ba), 
+ *         Merjem Gutošić (mgutosic1@etf.unsa.ba), Ivona Jozić (ijozic1@etf.unsa.ba),
+ *         Kanita Kadušić (kkadusic2@etf.unsa.ba)
+ * @brief A CUDA implementation of the L-BFGS optimization algorithm with mixed precision dot product.
+ * @version 1.0
+ * @date 2026-02-10
+ * 
+ * @copyright Copyright (c) 2026
+ * 
+ */
+
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <stdio.h>
@@ -14,10 +27,23 @@
 
 #define BLOCK_SIZE 256
 
+/**
+ * @brief Computes the sum of elements in a GPU array.
+ * 
+ * @param d_elements The GPU array of elements to sum.
+ * @param n The number of elements in the array.
+ * @return double The computed sum.
+ */
 double gpu_sum(double* d_elements, int n);
 
 /*----------------------------------------Datatypes---------------------------------------------------*/
 
+/**
+ * @brief A simple matrix wrapper allocated on the GPU. Manages its own memory and provides basic
+ * constructor and destructor. 
+ * 
+ * @tparam T The floating-point type (e.g., float or double) used for the matrix elements.
+ */
 template <typename T>
 struct GpuMatrix {
     int n, m;
@@ -26,6 +52,12 @@ struct GpuMatrix {
     ~GpuMatrix() { cudaFree(elems); }
 };
 
+/**
+ * @brief A simple vector wrapper allocated on the GPU. Manages its own memory and provides basic
+ * constructor and destructor.
+ * 
+ * @tparam T The floating-point type (e.g., float or double) used for the vector elements.
+ */
 template <typename T>
 struct GpuVector {
     int n;
@@ -34,6 +66,14 @@ struct GpuVector {
     ~GpuVector() { cudaFree(elems); }
 };
 
+/**
+ * @brief A simple vector wrapper allocated on the GPU using unified memory.
+ * Manages its own memory and provides basic constructor and destructor. Unified
+ * memory allows the vector to be accessed from both the host and the device 
+ * without explicit memory copies.
+ * 
+ * @tparam T The floating-point type (e.g., float or double) used for the vector elements. 
+ */
 template <typename T>
 struct UnifiedVector {
     int n;
@@ -42,6 +82,16 @@ struct UnifiedVector {
     ~UnifiedVector() { cudaFree(elems); }
 };
 
+/**
+ * @brief A helper structure to manage partial results for the dot product
+   kernel. Allocates memory for partial sums on both the device and the host,
+   and provides a method to clean (reset) the partial sums before each dot
+   product computation.
+ * 
+ * @tparam T The floating-point type (e.g., float or double) used for the
+   partial sums. Should match the type used in the dot product kernel for the
+   partial results.
+ */
 template <typename T>
 struct DotLookupTable {
     T* d_partial;
@@ -64,6 +114,15 @@ struct DotLookupTable {
     }
 };
 
+/**
+ * @brief A helper structure to compute optimal kernel launch parameters (block
+   size and grid size) based on the problem size and the GPU's capabilities. The
+   block size is set to a fixed value (e.g., 256), and the grid size is computed
+   to ensure enough threads to cover all elements while also considering the
+   number of SMs on the GPU for better occupancy. The grid size is capped to
+   avoid launching more blocks than necessary when the problem size is small.
+ * 
+ */
 struct KernelConfig {
     int blockSize;
     int gridSize;
@@ -80,14 +139,61 @@ struct KernelConfig {
 };
 
 /*----------------------------------------KERNELI (Prototipi)----------------------------------------*/
-
+/**
+ * @brief Kernel for computing the dot product of two vectors. Each block
+   computes a partial sum of the products. The final reduction is performed on
+   the host after copying the partial sums back from the device.
+ * 
+ * @tparam T The floating-point type (e.g., float or double) used for the vector
+   elements and the partial sums. Should match the type used in the DotLookupTable for the partial results.
+ * @param a First input vector on the device.
+ * @param b Second input vector on the device.
+ * @param c Result vector on the device.
+ * @param n Size of the input vectors.
+ * @return void
+ */
 template <typename T>
 __global__ void dotProduct(const T* a, const T* b, T* c, int n);
 
+/**
+ * @brief Kernel for computing the dot product of two vectors using atomic operations.
+ *        Uses atomic operations to accumulate partial sums in a shared memory array.
+ * 
+ * @param a First input vector on the device.
+ * @param b Second input vector on the device.
+ * @param out Output scalar value on the device.
+ * @param n Size of the input vectors.
+ */
 __global__ void dotAtomic(const float* a, const float* b, float* out, int n)
 
+/**
+ * @brief Kernel for computing the dot product of two vectors using double
+   precision partial sums. Each thread computes a portion of the dot product and
+   accumulates it in double precision to improve numerical stability. The final
+   partial sums are reduced on the host. 
+ * 
+ * @param a First input vector on the device.
+ * @param b Second input vector on the device.
+ * @param partial Partial sums array on the device.
+ * @param n Size of the input vectors.
+ * @return void
+ */
 __global__ void dotF64Reduction(const float* a, const float* b, double* partial, int n);
 
+/**
+ * @brief Kernel for computing the sum of elements in an array using a reduction
+   approach. Each block computes a partial sum of a portion of the input array, 
+   and the results are accumulated into a single output value using atomic
+   addition. 
+ * 
+ * @tparam T The floating-point type (e.g., float or double) used for the input 
+ *          elements and the output sum.
+ * @param r Output array on the device where the result will be stored.
+ * @param q Input array on the device.
+ * @param factor Scalar value to multiply each element of q by.
+ * @param n Size of the input arrays.
+ * @return __global__ 
+ */
 template <typename T>
 __global__ void setVectorScalar(T* r, const T* q, T factor, int n);
 
