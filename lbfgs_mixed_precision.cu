@@ -414,7 +414,7 @@ double lbfgs(int n, int m, T* x0, int max_itr, Func func, const double eps = 1e-
 int main(int argc, char* argv[]) {
     using T = float;
     
-    int N = 1 << 24;  // Problem size
+    int N = 1 << 12;  // Problem size
     int M = 10;       // History size
     T* x0 = new T[N];
 
