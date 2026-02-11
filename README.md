@@ -76,7 +76,7 @@ nvcc -O3 lbfgs_mixed_precision.cu -o lbfgs
 If you use this code in your research: <br>
 ```bash
 @article{lbfgs_cuda, 
-  title={CUDA L-BFGS Optimization: Comparative Benchmark with CPU and cuBLAS},
+  title={Mixed-Precision L-BFGS on CUDA: A Comparative Benchmark},
   author={Tarik Hastor and Ismar Muslić and Merjem Gutošić and Ivona Jozić and Kanita Kadušić}, 
   year={2026} 
 }
