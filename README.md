@@ -1,6 +1,6 @@
 # CUDA L-BFGS Optimization
 
-A CUDA implementation of the limited-memory Broyden–Fletcher–Goldfarb–Shanno (L-BFGS) algorithm for large-scale unconstrained optimization. The solver uses mixed-precision arithmetic and custom GPU kernels for vector operations, with emphasis on optimizing dot-product reductions in the two-loop recursion.
+A CUDA implementation of the limited-memory Broyden-Fletcher-Goldfarb-Shanno (L-BFGS) algorithm for large-scale unconstrained optimization. The solver uses mixed-precision arithmetic and custom GPU kernels for vector operations, with emphasis on optimizing dot-product reductions in the two-loop recursion.
 
 ---
 
